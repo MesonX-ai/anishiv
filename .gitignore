@@ -1,5 +1,10 @@
 # macOS
 .DS_Store
 
-# Exceeds GitHub's 100MB file size limit
-downloads/RICHA_FIRST_BIRTHDAY_SONG.mp4
+# Exceeds GitHub's 100MB file size limit - skip all .mp4 files
+*.mp4
+
+# FTP credentials (contains password)
+.ftp-config.json
+# Checksum manifest cache
+.deploy-manifest.sha256
