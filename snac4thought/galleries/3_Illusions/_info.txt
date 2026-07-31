@@ -1,0 +1,22 @@
+<HTML>
+  <TITLE>Snack 4 Thoughts by Shiva R Dhanuskodi</TITLE>
+<HEAD>
+</HEAD>
+<BODy style="font-family:calibri; font-size:15px;background-image:url('../../images/bg.PNG');background-color:transparent;">
+<CENTER>
+<br>
+<H1>Snac 4 Thought</H1><H3> by Shiva R Dhanuskodi</H3>
+<BR>
+<P align="left" style="width:800px">
+Hello Folks, Welcome to my special Snac Bar!<br/>
+I have taken a small iniative to organize some of the funtoons and pictures that made me to laugh
+and think at the same time. Needless to say, Happiness grows when we share it with others. Hats off
+to those creative minds who put their time and effort to keep the world smiling forever.
+</P>
+
+<P align="left" style="width:800px">
+<B>3. Illusions</B></P>
+<BR/>
+</CENTER>
+</BODY>
+</HTML>

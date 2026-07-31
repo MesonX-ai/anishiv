@@ -1,0 +1,191 @@
+﻿/* Joomgallery local Style - wont be overwritten by updates etc.
+ * Rename this file to "joom_local.css" to have it included in
+ * Joomgallery.
+ * You can override any Style Definition of Joomgallery
+ * Be sure to place !important behind each definition that could be
+ * defined elsewhere. 
+ * 
+ * A basic sample style is included below. Feel free to edit or 
+ * comment to your liking.
+ *
+ * 
+ * Diese Datei wird nicht von Updates o.ä. überschrieben.
+ * Benennen Sie diese in "joom_local.css" um, damit sie von der Joomgallery 
+ * erkannt und eingebunden wird.
+ *
+ * Sie können jede Style-Definition 'überschreiben', die von der Joomgallery
+ * standardmäßig in den anderen CSS-Dateien vergeben wird.
+ *
+ * Bitte fügen Sie ein '!important' in jeder Definition ein, die schon an
+ * anderer Stelle definiert ist.
+ *
+ * Ein grundlegendes Beispiel für geänderte Styles finden Sie untenstehend.
+ * Sie können diese nach Ihren Vorstellungen ändern.
+ * 
+ */
+ 
+ 
+.jg_element_gal, .jg_element_gal_r {
+  float:left !important;
+  /* width:220px !important;
+  margin-right:10px !important; */
+}
+.jg_element_txt {
+  text-align:center !important;
+}
+.jg_element_txt_subs {
+  text-align:center !important;
+  font-size: 0.9em;
+}
+.jg_photo_container {
+  text-align:center !important;
+}
+
+/* Category view */
+.jg_element_cat {
+  float:left !important;
+  text-align:center !important;
+
+}
+.jg_catelem_cat a{
+  height:116px !important;
+}
+.jg_catelem_photo {
+  display:block;
+  text-align:center !important;
+}
+.jg_catelem_txt {
+  text-align:center !important;
+}
+.jg_starrating_cat {
+  width:85px !important;
+  background: url(../images/star_gr.png) 0 0 repeat-x !important;
+  margin: 0 auto;
+}
+.jg_starrating_cat div {
+  height:16px !important;
+  background: url(../images/star_orange.png) 0 0 repeat-x !important;
+  margin-left: 0;
+  margin-right: auto;
+}
+
+/* Subcategory view */
+.jg_subcatelem_cat, .jg_subcatelem_cat_r{
+  width:49%;
+  float:left;
+  text-align:center !important;
+}
+.jg_subcatelem_cat a{
+  height:116px;
+}
+.jg_subcatelem_photo {
+  text-align:center !important;
+
+}
+.jg_subcatelem_txt {
+  clear:both;
+  text-align:center !important;
+}
+
+/* Detail view */
+.jg_starrating_detail {
+  width:85px !important;
+  background: url(../images/star_gr.png) 0 0 repeat-x !important;
+}
+.jg_starrating_detail div {
+  height:16px;
+  background: url(../images/star_orange.png) 0 0 repeat-x !important;
+}
+.jg_starrating_bar,
+.jg_starrating_bar div:hover,
+.jg_starrating_bar div:active,
+.jg_starrating_bar div:focus,
+.jg_starrating_bar .jg_current-rating {
+  background: url(../images/star_rating.png) left -1000px repeat-x !important;
+}
+.jg_starrating_bar {
+  position:relative;
+  width:120px;
+  height:24px;
+  overflow:hidden;
+  list-style:none;
+  margin:0px auto !important;
+  padding:0 !important;
+  background-position:left top;
+}
+.jg_starrating_bar li {
+  display:inline;
+  padding:0 !important;
+  margin:0 !important;
+}
+.jg_starrating_bar div,
+.jg_starrating_bar .jg_current-rating {
+  position:absolute;
+  top:0;
+  left:0;
+  text-indent:-1000em;
+  height:24px;
+  line-height:24px;
+  outline:none;
+  overflow:hidden;
+  border: none;
+}
+.jg_starrating_bar div:hover,
+.jg_starrating_bar div:active,
+.jg_starrating_bar div:focus {
+  background-position:left bottom;
+}
+.jg_starrating_bar div.jg_star_1 {
+  width:20%;
+  z-index:6;
+  cursor:pointer;
+  display:inline;
+}
+.jg_starrating_bar div.jg_star_2 {
+  width:40%;
+  z-index:5;
+  cursor:pointer;
+  display:inline;
+}
+.jg_starrating_bar div.jg_star_3 {
+  width:60%;
+  z-index:4;
+  cursor:pointer;
+  display:inline;
+}
+.jg_starrating_bar div.jg_star_4 {
+  width:80%;
+  z-index:3;
+  cursor:pointer;
+  display:inline;
+}
+.jg_starrating_bar div.jg_star_5 {
+  width:100%;
+  z-index:2;
+  cursor:pointer;
+  display:inline;
+}
+.jg_starrating_bar .jg_current-rating {
+  z-index:1;
+  background-position:left center;
+}
+
+/* Special view - Toplists*/
+.jg_topelement, .jg_favelement {
+  width:99%;
+  height:auto;
+
+}
+.jg_topelem_txt, .jg_favelem_txt {
+
+}
+.jg_starrating_fav, .jg_starrating_top  {
+  width:85px !important;
+  background: url(../images/star_gr.png) 0 0 repeat-x !important;
+}
+.jg_starrating_fav div, .jg_starrating_top div {
+  height:16px;
+  background: url(../images/star_orange.png) 0 0 repeat-x !important;
+  margin-left: 0;
+  margin-right: auto;
+}

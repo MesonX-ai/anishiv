@@ -1,0 +1,657 @@
+<!--
+  Copyright 2025 Mesonsoft LLC.
+
+  Licensed under the Mesonsoft License, Version 1.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.mesonsoft.com/licenses/LICENSE-1.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!--
+  Author : Shiva R Dhanuskodi
+  Created  On: 12/22/2013
+  Modified On: 06/09/2025
+  Version : 3.0
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-gb" lang="en-gb" >
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<head>
+<script type="text/javascript" src="js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript">jQuery.noConflict();</script>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <meta name="robots" content="index, follow" />
+  <meta name="google-site-verification" content="H9SzWS7zCdBsIwH2iB9K_miNBTzwb1J8aP4_4Z5PNIA" />
+  <meta name="keywords" content="Shiva Rajkumar Dhanuskodi, Shiva R Dhanuskodi, anita rekha,
+        anitha rekha Nell, anishivskitchen, mesonsoft, mesonsoft llc, nearbygoods, nearby goods, 
+        nearbygoods llc, warriors, warriors cricket club, magnafire, beattires, telecom, retail,
+        seven seas, anishiv, hcl, herndon cricket league, recipes, kitchen, cooking, softwares,
+        services, consulting, mobile, apps, development, uml, sketcher, jokes, journal,
+        snac 4 thoughts, food for thoughts, snack for thoughts, blogs, forum, journal, jokes, chat,
+        rohit shreyas, rohit s shivarajkumar, seven seas, Seven SEAS, SevenSEAS, Java, JEE,
+        One Platform-Independent Language, Core Java, Unified Modeling Language, UML, Structured
+        Query Language, SQL, Three-Stick NIM, Network, Integration, Management, Computer Networking,
+        Clustering , Continuous Integration Process, Hudson, Jenkins, Project Management, Maven,
+        ANT, Ivy, Unit Testing, JUnit, Easy Mock, GOF, Gang of Four, J2EE design patterns, 23 Java
+        Design Patterns,RUP, Six Sigma, DMAIC, SDLC, Agile Software Development, Waterfall Model,
+        Struts, Spring, Hibernate, iBatis, Apache Axis, AJAX, DOJO, Java EE APIs, Messaging Service,
+        JMS, Enterprise Bean, EJB, Persistence, JPA, JDBC, User Interface, JSF, JSP, Security, JAAS,
+        Simple Object Access Protocol, XML, JAXB, JAXP, Web Service, JAX-WS, JAX-RPC, Apache Axis,
+        UNIX, Shell Scripting, Java Script, Master Brains, SCEA, SCWCD, SCJD, SCJP, Sun Certification,    	
+		Sun Certified Java Programmer, Sun Certified Web Component Developer, Sun Certified Enterprise Architect, Wall of Wisdom" />
+  <meta name="description" content="AniShiv, a stickiest spot on the web" />
+  <meta name="generator" content="" />
+  <title>AniShiv World</title>
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="css/stylef488.css?ver=1.1.0" type="text/css" />
+  <link rel="stylesheet" href="css/mod_joomimg.css" type="text/css" />
+  <link rel="stylesheet" href="css/joom_settings.css" type="text/css" />
+  <link rel="stylesheet" href="css/joomgallery.css" type="text/css" />
+  <link rel="stylesheet" href="css/joom_local.css" type="text/css" />
+  <link rel="stylesheet" href="css/skitter.styles.css" type="text/css" />
+  <link href="css/tiny_box_styles.css" rel="stylesheet" type="text/css" />
+  <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet'>
+  <script type="text/javascript" src="js/tinybox.js"></script>	
+
+  <style type="text/css">
+    <!--
+.ve-mostread li{
+	list-style:none;
+	margin-bottom:15px;
+}
+.ve-mostread{
+	padding:0px;
+	margin:20px 10px 0px 10px !important;
+}
+.ve-thumb{
+	float:left;
+	background:url(images/background.png) no-repeat;
+	margin-right:5px;
+	width:79px;
+	height:52px;
+	overflow:hidden;
+	padding-left:4px;
+	padding-top:3px;
+}
+.ve-mostread .ve-thumb a{
+	display:block !important;
+	width:75px;
+	height:48px !important;
+	overflow:hidden;
+}
+.ve-mostread img{
+	width:75px;
+	border:0px;
+}
+a.ve-link,a.ve-link:visited{
+	color:#fff;
+	font-size:12px;
+}
+a.ve-link:hover{
+	color:#303030 !important;
+}
+.ve-mostread li a{
+	font-weight:bold !important;
+	background:none !important;
+	display:inline !important;
+	height:auto !important;
+	line-height:120% !important;
+}.joomimg66_imgct {
+width:33% !important;
+float:left;
+}
+.joomimg66_img {
+display:block;
+text-align:left!important;
+vertical-align:top!important;
+}
+.joomimg66_txt {
+clear:both;text-align:left!important;
+vertical-align:top!important;
+}
+    .joomcat65_clr {
+      clear:both;
+    }
+    .joomcat65_row {
+      overflow:hidden;
+      padding-bottom:0.5em;
+    }
+    .joomcat65_imgct {
+      width:33% !important;
+      float:left;
+    }
+    .joomcat65_img {
+      text-align:center !important;
+    }
+    .joomcat65_txt {
+      text-align:center !important;
+      padding-top:0.5em;
+    }
+    .joomcat65_starrating {
+      width:80px;
+      background: url(images/star_gr.png) 0 0 repeat-x;
+      margin: 0 auto;
+    }
+    .joomcat65_starrating div {
+      height:16px;
+      background: url(images/star_orange.png) 0 0 repeat-x;
+      margin-left: 0;
+      margin-right: auto;
+    }
+    -->
+  </style>
+  <script type="text/javascript" src="js/mootools.js"></script>
+  <script type="text/javascript" src="js/caption.js"></script>
+  <script type="text/javascript" src="js/slideshow.js"></script>
+  <script type="text/javascript" src="js/validate.js"></script>
+  <script type="text/javascript" src="js/btloader.min.js"></script>
+
+
+<link rel="stylesheet" href="css/system.css" type="text/css" />
+<link rel="stylesheet" href="css/general.css" type="text/css" />
+<link rel="stylesheet" href="css/template.css" type="text/css" />
+<link rel="stylesheet" href="css/stylesheet.css" type="text/css" />
+<!--[if lte IE 7]>
+<link href="css/ieonly.css" rel="stylesheet" type="text/css" />
+<![endif]-->
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5722481263099352"
+     crossorigin="anonymous"></script>
+</head>
+<body id="jf-body">
+  <div id="jf-wrap"><div id="jf-bottom-bg">
+	<div id="jf-wrapper">
+		<div id="jf-topleft"><p style="color:black;font-weight:normal;">AniShiv World - a stickiest spot on the web!</p></div>
+		<div id="jf-topright" style="float:center">
+			<ul>
+				<li><a href="https://myartroom.anishiv.com" target="_blank">My Art Room</a></li>
+				<li><span>|</span></li>
+				<li><a href="https://mythoughts.anishiv.com" target="_blank">My Thoughts</a></li>
+				<li><span>|</span></li>
+				<li><a href="https://mylab.anishiv.com" target="_blank">My Lab</a></li>
+				<li><span>|</span></li>
+				<li><a href="https://www.youtube.com/playlist?list=PLPc7m-uVvSfZeNkU_WyGMmFd-JCALAmjd" target="_blank">My Videos</a></li>
+				<li><span>|</span></li>
+				<li><a href="https://www.youtube.com/playlist?list=PLPc7m-uVvSfZ5G2MLCvmAth5tVgXNyfwC" target="_blank">My Fav. Books</a></li>
+			</ul>
+	</div>
+		<div class="clr"></div>
+		<!-- Header module -->
+		<div id="jf-header">
+			<div id="jf-logo">
+				<a href="http://www.anishiv.com"><img src="images/logo.png" alt="AniShiv"/></a>
+			</div>
+			<!-- Main menu module -->
+			<div id="jf-mainmenu">
+				<ul id="smartMenuUL">
+					<li class="topLevel">
+						<a href="https://www.mesonsoft.com" target="_blank" class="a_level0">
+							<span>Mesonsoft LLC</span>
+						</a>
+					</li>
+					<li class="topLevel">
+						<a href="https://www.squark-browser.ai" target="_blank" class="a_level0">
+							<span>sQuark AI</span>
+						</a>
+					</li>
+					<li class="topLevel">
+						<a href="https://mysports365.app" target="_blank" class="a_level0">
+							<span>My Sports 365</span>
+						</a>
+					</li>
+
+                    <li class="topLevel">
+						<a href="https://myfamilyassistant.ai" target="_blank" class="a_level0">
+							<span>My Fam AI</span>
+						</a>
+					</li>
+					<li class="topLevel">
+						<a href="https://www.wallofwisdom.org" target="_blank" class="a_level0">
+							<span>Wall of Wisdom</span>
+						</a>
+					</li>
+					<li class="topLevel">
+						<a href="https://www.sevenseasbook.us" target="_blank" class="a_level0">
+							<span>Seven SEAS</span>
+						</a>
+					</li>
+				</ul>				
+			</div>
+		</div>
+		<!-- Slideshow module -->
+			<div id="jf-slideshow">
+				<link href='css/oswald.css' rel='stylesheet' type='text/css'>
+				<div style="clear: both;"></div>
+				<div id="mod_btslideshow_59" class="box_skitter mod_btslideshow" style="width:939px; height:538px;">
+					<ul>
+						<li>
+							<a href="#"><img class="cubeRandom" src="images/anishivworld.png" rel="images/anishivworld.png" /></a>		
+							<div class="label_text">
+								<h4>AniShiv World</h4>
+								<p>a stickiest spot on the web<br />
+								<a href="#" class="sl-readmore"></a></p></div>
+						</li>
+						<li>
+							<a href="#"><img class="cubeRandom" src="images/mesonsoft.png" rel="images/mesonsoft.png" /></a>		
+							<div class="label_text"><h4>Mesonsoft LLC</h4>
+							<p>a passion for innovation<br/>CEO: Anita Shiva<br/>
+							<a href="https://www.mesonsoft.com" target="_blank" class="sl-readmore"></a></p></div>
+						</li>
+						<li>
+							<a href="#"><img class="cubeRandom" src="images/myfamilyassistant.png" rel="images/myfamilyassistant.png" /></a>		
+							<div class="label_text"><h4>My Family Assistant</h4>
+							<p>your AI companion, designed to enhance family life<br />
+                            Founder: Shiva R Dhanuskodi<br/>
+							<a href="https://myfamilyassistant.ai" target="_blank" class="sl-readmore"></a></p></div>
+						</li>
+                        <li>
+							<a href="#"><img class="cubeRandom" src="images/wow.png" rel="images/wow.png" /></a>		
+							<div class="label_text"><h4>Wall of Wisdom</h4>
+							<p>a platform to share your thoughts<br/>
+                            CTO: Shiva R Dhanuskodi<br/>
+							<a href="https://www.wallofwisdom.org" target="_blank" class="sl-readmore"></a></p></div>
+						</li>
+						<li>
+							<a href="#"><img class="cubeRandom" src="images/dudesndames.png" rel="images/dudesndames.png" /></a>		
+							<div class="label_text"><h4>Wall of Wisdom</h4>
+							<p>Spiritual - Science - Social<br />
+							<a href="https://www.wallofwisdom.org" target="_blank" class="sl-readmore"></a></p></div>
+						</li>
+						<li>
+							<a href="#"><img class="cubeRandom" src="images/mysports365.png" rel="images/mysports365.png" /></a>		
+							<div class="label_text"><h4>MySports365</h4>
+							<p>local sports, your way<br/>
+							<a href="https://mysports365.app" target="_blank" class="sl-readmore"></a></p></div>
+						</li>
+						<li>
+							<a href="#"><img class="cubeRandom" src="images/sevenseasbook.png" rel="images/sevenseasbook.png" /></a>		
+							<div class="label_text"><h4>Seven SEAS</h4>
+							<p>Solutions for Enterprise Applications and Services<br/>
+							 Author: Shiva R Dhanuskodi<br/>
+							<a href="https://www.sevenseasbook.us" target="_blank" class="sl-readmore"></a></p></div>
+						</li>
+                        <li>
+							<a href="#"><img class="cubeRandom" src="images/myartroom.png" rel="images/myartroom.png" /></a>		
+							<div class="label_text"><h4>AniShiv Artroom</h4>
+							<p>Experience of Canvas and Colors<br/>
+							<a href="https://myartroom.anishiv.com" target="_blank" class="sl-readmore"></a></p></div>
+						</li>
+                        <li>
+							<a href="#"><img class="cubeRandom" src="images/anishivlab.png" rel="images/anishivlab.png" /></a>		
+							<div class="label_text"><h4>AniShiv Lab</h4>
+							<p>Blending Art and Technology<br/>
+							<a href="https://mylab.anishiv.com/" target="_blank" class="sl-readmore"></a></p></div>
+						</li>
+						 <li>
+							<a href="#"><img class="cubeRandom" src="images/anishivprojects.png" rel="images/anishivprojects.png" /></a>		
+							<div class="label_text"><h4>AniShiv Projects</h4>
+							<p>Quantum AI and more...<br/>
+							<a href="https://mylab.anishiv.com/" target="_blank" class="sl-readmore"></a></p></div>
+						</li>
+						<li>
+							<a href="#"><img class="cubeRandom" src="images/anishivxp.png" rel="images/anishivxp.png" /></a>		
+							<div class="label_text"><h4>AniShivXP</h4>
+							<p>Never Stop Exploring<br/>
+							<a href="https://mythoughts.anishiv.com/" target="_blank" class="sl-readmore"></a></p></div>
+						</li>
+						<li>
+							<a href="#"><img class="cubeRandom" src="images/warriorscricketclub.png" rel="images/warriorscricketclub.png" /></a>		
+							<div class="label_text"><h4>Warriors Cricket Club</h4>
+							<p>a club for the cubs<br />
+							<a href="https://www.warriorscricketclub.us/" target="_blank" class="sl-readmore"></a></p></div>
+						</li>
+                        <li>
+							<a href="#"><img class="cubeRandom" src="images/nearbygoods.png" rel="images/nearbygoods.png" /></a>		
+							<div class="label_text"><h4>Our Dreams</h4>
+							<p>Diverse selection of Curated Products<br/>
+							<a href="https://ourdreams.us/" target="_blank" class="sl-readmore"></a></p></div>
+						</li>
+						</ul>
+				</div>
+				<div style="clear: both;"></div>
+<script>
+
+(function(){
+	var libs = [
+		'js/jquery-1.6.2.min.js', 
+		'js/jquery.skitter.min.js', 
+		'js/jquery.easing.1.3.min.js', 
+		'js/jquery.animate-colors-min.js'
+	];
+	
+	BT.Loader.js(libs, function(){
+		jQuery.noConflict();
+					jQuery('#mod_btslideshow_59').skitter({
+				width:939,
+				height:538,
+				animation: 'random',
+				structure:			
+					'<a href="#" class="prev_button">prev</a>' +
+					'<a href="#" class="next_button">next</a>' +
+					'<span class="info_slide"></span>' +
+					'<div class="label_skitter"></div>'+
+					'<div class="container_skitter">' +
+						'<div class="image">' +
+							'<a target="_blank" href="/demo/jf_texturia/"><img class="image_main" /></a>' +
+						'</div>' +
+					'</div><div id="bt-slideshow-bg"></div>',
+				velocity: 1.3,
+				interval: 2500,
+				thumb_width: '70px',
+				thumb_height: '40px',
+				caption: 'bottom',
+				caption_width: '250',
+				navigation: 1,
+				fullscreen: false
+			});
+	});
+})();
+
+</script>
+   <script>
+    $.fn.preload = function() {
+        this.each(function(){
+            $('<img/>')[0].src = this;
+        });
+    }
+    
+    // Usage:
+    $(['images/d.png','images/l.png','images/r.png']).preload();
+  </script>  
+
+
+
+			</div>
+				<!-- Main page -->
+		<div id="jf-main-page">
+			
+			<div id="jf-main">
+				<!-- Top module -->
+
+								<div id="jf-content">
+					<table class="blog" cellpadding="0" cellspacing="0">
+						<tr>
+							<td valign="top">
+											<div class="item_lead">
+								
+						<table class="contentpaneopen">
+						<tr>
+								<td class="contentheading" width="100%">
+										<span class="jf-date-content">a<span>anishiv</span></span>
+											Who We Are		
+								</td>
+						</tr>
+					</table>
+<table class="contentpaneopen">
+
+	</td>
+</tr>
+
+
+
+<tr>
+<td valign="top" colspan="2">
+<p>
+In a world where colors dance and play, a loving couple finds their way through whispered winds and gentle streams. They weave together vibrant dreams, painting the dawn with hues so bright, transforming shadows into light. With every glance, a spark ignites, revealing the beauty in all that surrounds them, from morning dew to starlit skies.</p>
+
+<p>With hands entwined, they chase the sun, discovering joy in the simplest moments. In laughter shared and quiet sighs, their spirits rise, creating art from passion's fire. Each brushstroke is fueled by love’s desire, a testament to their connection that deepens with every new creation. Together, they embrace the magic that never dies, celebrating the beauty of life in all its forms.
+</p>
+</td>
+</tr>
+
+
+<tr>
+	<td  colspan="2">
+		<a href="#" class="readon">
+			Read more</a>
+	</td>
+</tr>
+
+</table>
+<span class="article_separator">&nbsp;</span>
+		</div>
+
+		</td>
+</tr>
+
+
+</table>
+
+				</div>
+			</div>
+			<!-- right -->
+	<div id="jf-right">
+		<div class="jfmod module" id="Mod52">
+		   <div class="jfmod-top"></div>
+					<div class="jfmod-mid">
+							<h3 style="margin-left:20px">Featured</h3>
+						<div class="jfmod-content">
+							<ul class="menu">
+								<li class="item44">
+									<a href="https://mysports365.app" target="_blank">
+										<span>My Sports 365</span>
+									</a>
+								</li>
+								<li class="item45">
+									<a href="https://myfamilyassistant.ai" target="_blank">
+										<span>My Family Assistant</span>
+									</a>
+								</li>
+								<li class="item46">
+									<a href="https://ourdreams.us/" target="_blank">
+										<span>Our Dreams</span>
+									</a>
+								</li>
+								<li class="item47">
+									<a href="https://www.warriorscricketclub.us" target="_blank">
+										<span>Warriors Cricket Club</span>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+		<div class="jfmod-bot"></div></div>
+			<div class="jfmod module_social" id="Mod54">
+		   <div class="jfmod-top"></div><div class="jfmod-mid">
+							<h3 style="margin-left:15px">Follow us on</h3>
+			<div class="jfmod-content">
+				<p><a href="https://www.facebook.com/anishiv/" target="_blank">
+					<img src="images/facebook.png" width="33px" border="0" />
+					</a>
+					<a href="https://x.com/mesonsoft" target="_blank">
+					<img src="images/x.png" width="33px" border="0" />
+					</a>
+					<a href="https://www.linkedin.com/company/11166131/admin/dashboard/" target="_blank">
+					<img src="images/linkedin.png" width="33px" border="0" />
+					</a>
+					<a href="https://www.youtube.com/playlist?list=PLPc7m-uVvSfZeNkU_WyGMmFd-JCALAmjd" target="_blank">
+					<img src="images/youtube.png" width="33px" border="0" />
+					</a>
+				</p>
+			</div></div>
+		<div class="jfmod-bot"></div></div>
+	
+			</div>
+			<div class="clr"></div>
+			<div id="jf-user1">
+			<div class="jfmod module" id="Mod56"><div class="jfmod-inner">
+			<h3>Announcements</h3>
+		<div class="jfmod-content"><ul class="latestnews">
+	<li class="latestnews">
+		<span class="jf-date">Q1</span>
+		<a href="#" class="latestnews">
+			Both Mobile and Web apps for MySports365&#174; go live
+		</a>
+	</li>
+	<li class="latestnews">
+		<span class="jf-date">Q2</span>
+		<a href="#" class="latestnews">
+			Mobile app for MyFamilyAssistant AI&#174; go live
+		</a>
+	</li>
+	<li class="latestnews">
+		<span class="jf-date">Q3</span>
+		<a href="#" class="latestnews">
+			Our Dreams&#174; will be launched
+		</a>
+	</li>
+</ul></div>
+		</div></div>
+	
+				</div>
+					<div id="jf-user5">
+		<div class="jfmod module" id="Mod58"><div class="jfmod-inner">
+		<h3>Get in touch with us</h3>
+	<div class="jfmod-content"><script language="javascript">
+	function contactValidate(f)
+	{
+		if (document.formvalidator.isValid(f)) {
+			f.check.value='1a7bf01c76d97e46cf5dcf6d4315c27b';
+			return true; 
+		} else {
+			alert('Please enter your contact details. Please try again.');
+		}
+		return false;
+	}
+	function clearText(field)
+	{
+		if (field.defaultValue == field.value)
+		{
+			field.value = '';
+		}
+	}
+
+</script>
+<div id="contactForm">
+	<p></p>
+	<form id="contactForm" method="post" class="form-validate" onSubmit="return contactValidate(this);" action="#">
+		<div class="contact-left">
+			<input name="name" type="text" class="contactInput" value="Your Name" onFocus="clearText(this)" />
+			<input name="email" type="text" class="contactInput required validate-email" value="Your Email" onFocus="clearText(this)" />
+		</div>
+		<div class="contact-right">
+			<textarea name="text" class="contactTextarea">Your Message</textarea>
+		</div>
+		<div class="clr"></div>
+	   <input type="submit" value="Send the message" class="contactButton" />
+       <input type="hidden" name="contact_task" value="send" />
+	   <input type="hidden" name="check" value="post" />
+  </form>
+</div>
+</div>
+		</div></div>
+	
+				</div>
+						<div class="clr"></div>
+		</div>
+	<!-- Footer modules -->
+	<div id="jf-footer">
+	    <!-- bottom content -->
+		<div id="jf-bottom">
+		<div class="jfmod module_bottom" id="Mod67"><div class="jfmod-inner">
+		<h3>Gallery</h3>
+		<div class="jfmod-content"><div class="modjoomimg">
+  <div id="slidewrap">
+    <div id="slideshow67">
+
+    	<ul class="carousel">  
+			<li>
+				<a href="#">
+					<img src="images/A.png" />
+				</a>
+			</li>
+			<li>
+				<a href="#">
+					<img src="images/N.png" />
+				</a>
+			</li>
+			<li>
+				<a href="#">
+					<img src="images/I.png" />
+				</a>
+			</li>
+			<li>
+				<a href="#">
+					<img src="images/S.png" />
+				</a>
+			</li>
+			<li>
+				<a href="#">
+					<img src="images/H.png" />
+				</a>
+			</li>
+			<li>
+				<a href="#">
+					<img src="images/I.png" />
+				</a>
+			</li>
+			<li>
+				<a href="#">
+					<img src="images/V.png" />
+				</a>
+			</li>
+			<li>
+				<a href="#">
+					<img src="images/w.png" />
+				</a>
+			</li>
+			<li>
+				<a href="#">
+					<img src="images/o.png" />
+				</a>
+			</li>
+			<li>
+				<a href="#">
+					<img src="images/r.png" />
+				</a>
+			</li>
+			<li>
+				<a href="#">
+					<img src="images/l.png" />
+				</a>
+			</li>
+			<li>
+				<a href="#">
+					<img src="images/d.png" />
+				</a>
+			</li>
+		</ul>
+    </div>
+  </div>
+    <script type="text/javascript" src="js/jquery.jcarousel.min.js"></script>
+    <script type="text/javascript">
+		jQuery(document).ready(function() {
+			    jQuery('.carousel').jcarousel({
+                        auto: 1, // Scrolls every 1 second
+                        animation: 2000, // Animation takes 2 seconds
+                        easing: 'linear', // Uses a linear easing effect
+                        wrap: 'circular' // Optional: Creates a continuous loop
+                });
+		});
+	</script>
+	
+	</div></div>
+	</div></div>
+		</div>
+			<!-- footer module -->
+			<div id="jf-footermodule">
+			<p>Copyright &copy; <span id="currentYear"></span> <a href="https://www.mesonsoft.com" target="_blank" style="text-decoration:none;color:inherit">Mesonsoft LLC</a>, All rights reserved. <a href="https://shiva-dhanuskodi.us" target="_blank" style="text-decoration:none;color:inherit"> - Shiva Dhanuskodi</a></p>
+		</div>
+		<div id="jf-joomfreak">
+			<a href="https://www.mesonsoft.com/" target="_blank" rel="follow">
+			<img src="/images/ms_logo_new_3d.png" width="150px" alt="Mesonsoft LLC"/>
+			</a>
+		</div>
+	</div>
+ </div>
+<script>
+      document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>

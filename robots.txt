@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /.errordocs/
+Disallow: /stats/
+Disallow: /images/
+Disallow: /downloads/
+Disallow: /js/
+Disallow: /albums/
+Disallow: /ssfm/
+Disallow: /cgi/
+Disallow: /css/

@@ -1,0 +1,5 @@
+AuthType Basic
+AuthName "anishiv.com Statistics"
+AuthUserFile /var/chroot/home/content/41/4617441/html/stats/.statspwd
+Require valid-user
+DirectoryIndex index.htm
