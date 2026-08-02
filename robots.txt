@@ -7,7 +7,6 @@ Disallow: /cgi-bin/
 Allow: /css/
 Allow: /js/
 Allow: /images/
-Allow: /albums/
 Allow: /downloads/
 
 Sitemap: https://www.anishiv.com/sitemap.xml
