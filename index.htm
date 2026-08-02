@@ -543,16 +543,6 @@ In a world where colors dance and play, a loving couple finds their way through 
 		<div class="jfmod module" id="Mod58"><div class="jfmod-inner">
 		<h3>Get in touch with us</h3>
 	<div class="jfmod-content"><script>
-	function contactValidate(f)
-	{
-		if (document.formvalidator.isValid(f)) {
-			f.check.value='1a7bf01c76d97e46cf5dcf6d4315c27b';
-			return true; 
-		} else {
-			alert('Please enter your contact details. Please try again.');
-		}
-		return false;
-	}
 	function clearText(field)
 	{
 		if (field.defaultValue == field.value)
@@ -564,7 +554,7 @@ In a world where colors dance and play, a loving couple finds their way through 
 </script>
 <div id="contactForm">
 	<p></p>
-	<form id="contactForm" method="post" class="form-validate" onSubmit="return contactValidate(this);" action="#">
+	<form id="homeContactForm" method="post" class="form-validate" action="contact_submit.php" accept-charset="UTF-8" novalidate>
 		<div class="contact-left">
 			<input name="name" type="text" class="contactInput" value="Your Name" onFocus="clearText(this)" />
 			<input name="email" type="text" class="contactInput required validate-email" value="Your Email" onFocus="clearText(this)" />
@@ -573,9 +563,11 @@ In a world where colors dance and play, a loving couple finds their way through 
 			<textarea name="text" class="contactTextarea">Your Message</textarea>
 		</div>
 		<div class="clr"></div>
-	   <input type="submit" value="Send the message" class="contactButton" />
+	   <input type="submit" value="Send Message" class="contactButton" />
        <input type="hidden" name="contact_task" value="send" />
 	   <input type="hidden" name="check" value="post" />
+	   <input type="text" name="website" value="" autocomplete="off" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;" />
+	   <p id="contactFormStatus" aria-live="polite" style="margin-top:10px;"></p>
   </form>
 </div>
 </div>
@@ -687,5 +679,6 @@ In a world where colors dance and play, a loving couple finds their way through 
 <script>
       document.getElementById('currentYear').textContent = new Date().getFullYear();
 </script>
+<script type="text/javascript" src="js/contact-form.js"></script>
 </body>
 </html>
