@@ -3,7 +3,6 @@
 # publish_site - Publish AniShiv.com to GitHub & GoDaddy
 #
 # Usage: ./publish_site [options]
-#
 # Options:
 #   --help           Show this help message
 #   --dry-run        Prepare deployment but skip git push and FTP upload
@@ -69,6 +68,33 @@ require_command() {
     print_error "Required command not found: $cmd"
     exit 1
   fi
+}
+
+resolve_ftp_remote_path() {
+  local ftp_user="$1"
+  local ftp_pass="$2"
+  local ftp_host="$3"
+  local configured_path="$4"
+
+  if lftp -u "$ftp_user","$ftp_pass" "$ftp_host" \
+    -e "set ftp:passive-mode on; set ftp:ssl-allow no; cd \"$configured_path\"; bye" \
+    >/dev/null 2>&1; then
+    echo "$configured_path"
+    return 0
+  fi
+
+  if [[ "$configured_path" == /public_html/* ]]; then
+    local alt_path="/${configured_path#/public_html/}"
+    if lftp -u "$ftp_user","$ftp_pass" "$ftp_host" \
+      -e "set ftp:passive-mode on; set ftp:ssl-allow no; cd \"$alt_path\"; bye" \
+      >/dev/null 2>&1; then
+      echo "$alt_path"
+      return 0
+    fi
+  fi
+
+  print_error "Unable to access remote path from FTP profile: $configured_path"
+  exit 1
 }
 
 # ------------------------------------------------------------------
@@ -203,6 +229,10 @@ print(f'ftp_pass={cfg[\"password\"]}')
 print(f'ftp_remote={cfg[\"path\"]}')
 "
   )"
+
+  ftp_remote="$(resolve_ftp_remote_path "$ftp_user" "$ftp_pass" "$ftp_host" "$ftp_remote")"
+  REMOTE_PATH="$ftp_remote"
+  print_info "Resolved remote upload path: $REMOTE_PATH"
 
   local tmp_dir
   tmp_dir="$(mktemp -d)"
