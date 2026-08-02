@@ -2,7 +2,7 @@
 /*
  * Contact form handler for homepage submissions.
  *
- * Configure destination email with CONTACT_FORM_TO environment variable.
+ * Recipient is intentionally fixed per owner request.
  */
 
 declare(strict_types=1);
@@ -70,10 +70,10 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     fail(422, 'Please enter a valid email address.');
 }
 
-$recipient = getenv('CONTACT_FORM_TO');
-if (!$recipient) {
-    $recipient = 'shiva.dhanuskodi@mesonsoft.com';
-}
+$recipient = 'shiva.dhanuskodi@mesonsoft.com';
+$fromAddress = 'no-reply@anishiv.com';
+$fromName = 'AniShiv Contact';
+$envelopeSender = 'no-reply@anishiv.com';
 
 $subject = 'New message from AniShiv homepage';
 $bodyLines = [
@@ -94,12 +94,27 @@ $cleanEmail = str_replace(["\r", "\n"], '', $email);
 $headers = [
     'MIME-Version: 1.0',
     'Content-Type: text/plain; charset=UTF-8',
-    'From: AniShiv Contact <no-reply@anishiv.com>',
+    'From: ' . $fromName . ' <' . $fromAddress . '>',
+    'Sender: ' . $fromAddress,
+    'Return-Path: ' . $fromAddress,
     'Reply-To: ' . $cleanEmail,
     'X-Mailer: PHP/' . phpversion()
 ];
 
-$mailSent = @mail($recipient, $subject, $body, implode("\r\n", $headers));
+$mailSent = @mail(
+    $recipient,
+    $subject,
+    $body,
+    implode("\r\n", $headers),
+    '-f' . $envelopeSender
+);
+$mailError = null;
+if (!$mailSent) {
+    $lastError = error_get_last();
+    if (is_array($lastError) && isset($lastError['message'])) {
+        $mailError = (string)$lastError['message'];
+    }
+}
 
 $logDir = __DIR__ . '/messages';
 $logPath = $logDir . '/contact_messages.log';
@@ -111,12 +126,16 @@ if (!is_dir($logDir)) {
 
 $logRecord = [
     'timestamp' => gmdate('c'),
+    'recipient' => $recipient,
+    'from' => $fromAddress,
+    'envelope_sender' => $envelopeSender,
     'name' => $name,
     'email' => $email,
     'message' => $message,
     'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
     'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
-    'mail_sent' => $mailSent
+    'mail_sent' => $mailSent,
+    'mail_error' => $mailError
 ];
 
 $encodedRecord = json_encode($logRecord, JSON_UNESCAPED_SLASHES);
@@ -124,7 +143,7 @@ if ($encodedRecord !== false) {
     $logged = @file_put_contents($logPath, $encodedRecord . PHP_EOL, FILE_APPEND | LOCK_EX) !== false;
 }
 
-if (!$mailSent && !$logged) {
+if (!$mailSent) {
     fail(500, 'Unable to deliver your message right now. Please try again later.');
 }
 
