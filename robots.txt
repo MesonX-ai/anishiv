@@ -1,6 +1,5 @@
 User-agent: *
 Disallow: /.errordocs/
-Disallow: /stats/
 Disallow: /cgi/
 Disallow: /cgi-bin/
 
