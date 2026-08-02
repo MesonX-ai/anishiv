@@ -16,7 +16,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$SCRIPT_DIR"
-FTP_CONFIG="$PROJECT_DIR/.ftp-config.json"
+WORKSPACE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+FTP_CONFIG="$WORKSPACE_DIR/ftp-config.json"
+FTP_PROFILE="AniShiv"
 REMOTE_PATH="/public_html/anishiv"
 COMMIT_MESSAGE="Publish site updates"
 DRY_RUN=false
@@ -183,18 +185,22 @@ upload_to_godaddy() {
     exit 1
   fi
 
-  # Read FTP credentials from config
+  # Read FTP credentials from centralized config (find profile by name)
   local ftp_host ftp_port ftp_user ftp_pass ftp_remote
   eval "$(
-    python3 -c "
-import json
-with open('$FTP_CONFIG') as f:
-    cfg = json.load(f)
+    FTP_PROFILE="$FTP_PROFILE" FTP_CONFIG="$FTP_CONFIG" python3 -c "
+import json, os
+with open(os.environ['FTP_CONFIG']) as f:
+    configs = json.load(f)
+profile = os.environ['FTP_PROFILE']
+cfg = next((c for c in configs if c['name'] == profile), None)
+if cfg is None:
+    raise SystemExit(f'FTP profile not found: {profile}')
 print(f'ftp_host={cfg[\"host\"]}')
 print(f'ftp_port={cfg[\"port\"]}')
 print(f'ftp_user={cfg[\"username\"]}')
 print(f'ftp_pass={cfg[\"password\"]}')
-print(f'ftp_remote={cfg[\"remotePath\"]}')
+print(f'ftp_remote={cfg[\"path\"]}')
 "
   )"
 
