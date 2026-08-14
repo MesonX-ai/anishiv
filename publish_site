@@ -130,7 +130,7 @@ from pathlib import Path
 
 deploy_dir = Path('$PROJECT_DIR')
 manifest_path = Path('$manifest_path')
-exclude_names = {'.git', '.DS_Store', '.ftp-config.json', '.deploy-manifest.sha256'}
+  exclude_names = {'.git', '.DS_Store', '.ftp-config.json', '.deploy-manifest.sha256', 'projects_backup.json', 'progress_monitor.json'}
 exclude_suffixes = {'.pyc', '.pyo', '.mp4'}
 
 rows = []

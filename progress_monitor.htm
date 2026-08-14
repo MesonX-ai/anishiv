@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>⚡ In-Memory Daily Project Progress Matrix | AniShiv</title>
+<meta name="description" content="AniShiv Progress Monitor dashboard - track daily project tasks, accomplishments, accrued time overhead, and strategic end goals." />
+<style>
+  body { margin: 0; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; background: #f4f6fa; color: #333; }
+  .wrap { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+  h1 { border-bottom: 2px solid #333; padding-bottom: 0.5rem; font-size: 1.8rem; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 1.5rem 0 2rem; }
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  .panel { padding: 1.5rem; border: 1px solid #ccc; border-radius: 8px; background: #f9f9f9; }
+  .panel h2 { margin-top: 0; font-size: 1.15rem; }
+  label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+  input, select, textarea { width: 100%; padding: 0.5rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 0.95rem; }
+  button { padding: 0.6rem 1.2rem; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: #fff; }
+  .btn-blue { background: #0070f3; }
+  .btn-green { background: #10b981; }
+  button:hover { opacity: 0.9; }
+  .dash { border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; background: #fff; }
+  table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+  th { padding: 0.75rem; border: 1px solid #e5e7eb; background: #f3f4f6; border-bottom: 2px solid #e5e7eb; }
+  td { padding: 0.75rem; border: 1px solid #e5e7eb; vertical-align: top; }
+  td.hours { color: #10b981; font-weight: bold; }
+  td.date { font-weight: bold; background: #fafafa; white-space: nowrap; }
+  .proj-h3 { margin: 0 0 0.5rem 0; color: #0070f3; font-size: 1.4rem; }
+  .goals { margin: 0 0 1.2rem 0; font-size: 0.95rem; color: #555; background: #f0f7ff; padding: 0.75rem; border-radius: 4px; }
+  .empty { color: #666; font-style: italic; }
+  .back { display: inline-block; margin-bottom: 1rem; color: #0070f3; text-decoration: none; font-weight: 600; }
+  .msg { padding: 0.6rem 1rem; border-radius: 4px; margin-bottom: 1rem; display: none; font-size: 0.95rem; }
+  .msg.ok { background: #e7f7ef; color: #0f7a4d; display: block; }
+  .msg.err { background: #fdecec; color: #b02a37; display: block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/">&larr; Back to AniShiv World</a>
+  <h1>⚡ In-Memory Daily Project Progress Matrix</h1>
+  <div id="msg" class="msg"></div>
+
+  <div class="grid">
+    <!-- Panel A: Engine Infrastructure Setup -->
+    <div class="panel">
+      <h2>🆕 Setup New Project Profile</h2>
+      <form id="form-project">
+        <label>Project Name:</label>
+        <input type="text" id="projName" placeholder="e.g., E-Commerce Infrastructure Engine" required />
+        <label>End Goal Architecture:</label>
+        <textarea id="endGoal" rows="4" placeholder="e.g., Deliver zero-latency shopping session workflows..."></textarea>
+        <button type="submit" class="btn-blue">Initialize Project</button>
+      </form>
+    </div>
+
+    <!-- Panel B: Production Status Management Log Entries -->
+    <div class="panel">
+      <h2>📝 Log Daily Execution Progress</h2>
+      <form id="form-log">
+        <label>Target Project Reference:</label>
+        <select id="selectedProj"></select>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div>
+            <label>Log Date:</label>
+            <input type="date" id="logDate" required />
+          </div>
+          <div>
+            <label>Time Expended (Hours):</label>
+            <input type="number" id="timeSpent" step="0.25" min="0" placeholder="e.g., 3.5" required />
+          </div>
+        </div>
+        <label>Daily Tasks Attempted:</label>
+        <textarea id="tasks" rows="3" placeholder="List current operational metrics worked on..."></textarea>
+        <label>Concrete Accomplishments:</label>
+        <textarea id="accomplishments" rows="3" placeholder="What target milestones did you finalize today?"></textarea>
+        <button type="submit" class="btn-green">Commit Active Track Log</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Panel C: Real-Time State Data Visualization Grid Layout -->
+  <h2>📊 Live Operational Dashboard Matrix</h2>
+  <div class="dash" id="dashboard">
+    <p class="empty">No tracking projects found. Initialize an engine index above to start parsing records.</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  var API_BASE = 'progress_api.php';
+  var db = { projects: [], logs: [] };
+
+  var elMsg = document.getElementById('msg');
+  var dashboard = document.getElementById('dashboard');
+  var projSelect = document.getElementById('selectedProj');
+  var formProject = document.getElementById('form-project');
+  var formLog = document.getElementById('form-log');
+
+  function showMsg(text, type, ms) {
+    elMsg.textContent = text;
+    elMsg.className = 'msg ' + (type || 'ok');
+    if (ms) setTimeout(function () { elMsg.className = 'msg'; }, ms);
+  }
+
+  function refreshData(cb) {
+    return fetch(API_BASE + '?route=data')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        db = data && data.projects ? data : { projects: [], logs: [] };
+        render();
+        if (cb) cb();
+      })
+      .catch(function (err) {
+        console.error('Critical failure during active background connection stream handshake:', err);
+        showMsg('Could not reach the tracker API (' + API_BASE + ').', 'err', 4000);
+      });
+  }
+
+  function escapeHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function render() {
+    projSelect.innerHTML = '';
+    db.projects.forEach(function (p) {
+      var opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.name;
+      projSelect.appendChild(opt);
+    });
+
+    if (db.projects.length === 0) {
+      dashboard.innerHTML = '<p class="empty">No tracking projects found. Initialize an engine index above to start parsing records.</p>';
+      return;
+    }
+
+    var html = '';
+    db.projects.forEach(function (project) {
+      var projectLogs = db.logs.filter(function (l) { return l.projectId === project.id; });
+      var totalHours = projectLogs.reduce(function (sum, cur) { return sum + parseFloat(cur.timeSpent || 0); }, 0);
+
+      html += '<div style="margin:0 0 2.5rem;padding-bottom:1.5rem;border-bottom:1px solid #eee;">';
+      html += '<h3 class="proj-h3">📁 ' + escapeHtml(project.name) + '</h3>';
+      html += '<p class="goals"><strong>🎯 Core End Goal Target:</strong> ' +
+              escapeHtml(project.endGoal || 'None Specified') +
+              '<span style="margin:0 10px;color:#ccc">|</span>' +
+              '<strong>⏳ Accrued Overhead:</strong> ' + totalHours.toFixed(2) + ' Hours Total</p>';
+
+      if (projectLogs.length === 0) {
+        html += '<p class="empty" style="margin-left:0.5rem;">No logs registered to this project profile yet.</p>';
+      } else {
+        html += '<div style="overflow-x:auto;"><table>';
+        html += '<thead><tr><th style="width:150px">Target Date</th><th style="width:120px">Tracked Effort</th><th>Engine Tasks</th><th>Milestones &amp; Accomplishments</th></tr></thead>';
+        html += '<tbody>';
+        projectLogs.forEach(function (log) {
+          html += '<tr>';
+          html += '<td class="date">' + escapeHtml(log.date) + '</td>';
+          html += '<td class="hours">' + escapeHtml(log.timeSpent) + ' hrs</td>';
+          html += '<td style="white-space:pre-wrap">' + escapeHtml(log.tasks) + '</td>';
+          html += '<td style="white-space:pre-wrap">' + escapeHtml(log.accomplishments) + '</td>';
+          html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+      }
+      html += '</div>';
+    });
+    dashboard.innerHTML = html;
+  }
+
+  // Create project
+  formProject.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = document.getElementById('projName').value.trim();
+    var goal = document.getElementById('endGoal').value.trim();
+    if (!name) return;
+    fetch(API_BASE + '?route=project', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, endGoal: goal })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function () {
+        document.getElementById('projName').value = '';
+        document.getElementById('endGoal').value = '';
+        refreshData(function () { showMsg('Project profile initialized successfully.', 'ok', 3000); });
+      })
+      .catch(function () { showMsg('Failed to create project.', 'err', 4000); });
+  });
+
+  // Log daily progress
+  formLog.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var projectId = projSelect.value;
+    var date = document.getElementById('logDate').value;
+    var time = document.getElementById('timeSpent').value;
+    if (!projectId || !time) return;
+    fetch(API_BASE + '?route=log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        projectId: projectId,
+        date: date,
+        timeSpent: parseFloat(time),
+        tasks: document.getElementById('tasks').value,
+        accomplishments: document.getElementById('accomplishments').value
+      })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function () {
+        document.getElementById('timeSpent').value = '';
+        document.getElementById('tasks').value = '';
+        document.getElementById('accomplishments').value = '';
+        document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
+        refreshData(function () { showMsg('Active track log committed successfully.', 'ok', 3000); });
+      })
+      .catch(function () { showMsg('Failed to commit track log.', 'err', 4000); });
+  });
+
+  // Initialize date to today
+  document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
+
+  // Hydrate application configuration contexts from the remote PHP runtime memory engine
+  refreshData();
+})();
+</script>
+
+</body>
+</html>

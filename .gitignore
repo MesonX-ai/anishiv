@@ -8,3 +8,10 @@
 .ftp-config.json
 # Checksum manifest cache
 .deploy-manifest.sha256
+
+# Auto-generated runtime persistence file for the In-Memory Progress Monitor
+# backend (progress_api.php). Generated on the server on first write via
+# APCu + JSON disk fallback; never commit local/runtime copies so they cannot
+# overwrite live server data during deployment.
+progress_monitor.json
+projects_backup.json
