@@ -314,6 +314,32 @@
     font-size: 0.85rem;
   }
   .site-footer p { margin: 0; }
+
+  /* Brand heading: chrome "MesonX" + pulsing "Pulse" */
+  .h-brand { letter-spacing: -0.02em; }
+  .brand-metal {
+    background: linear-gradient(180deg, #ffffff 0%, #e9eff3 24%, #aebfc9 47%, #f5f9fb 55%, #ffffff 72%, #c3cfd9 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    filter: drop-shadow(0 0 10px rgba(45, 212, 191, 0.55)) drop-shadow(0 0 24px rgba(34, 211, 238, 0.40));
+  }
+  .brand-pulse {
+    display: inline-block;
+    color: #ffffff;
+    -webkit-text-stroke: 1px rgba(34, 211, 238, 0.35);
+    filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.55)) drop-shadow(0 0 18px rgba(45, 212, 191, 0.35));
+    animation: heartPulse 1.25s ease-in-out infinite;
+  }
+  @keyframes heartPulse {
+    0%   { transform: scale(1); }
+    15%  { transform: scale(1.18); }
+    30%  { transform: scale(1); }
+    45%  { transform: scale(1.10); }
+    60%  { transform: scale(1); }
+    100% { transform: scale(1); }
+  }
 </style>
 </head>
 <body>
@@ -326,7 +352,7 @@
 </div>
 <div class="wrap content" id="content">
   <a class="back" href="/">&larr; Back to AniShiv World</a>
-  <h1>⚡ MesonX Pulse</h1>
+  <h1 class="h-brand"><span class="brand-metal">MesonX</span> <span class="brand-pulse">Pulse</span></h1>
   <div id="msg" class="msg"></div>
 
   <!-- Main content: Live Operational Dashboard -->
