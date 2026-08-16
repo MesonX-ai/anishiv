@@ -277,6 +277,10 @@
   .chart-axis { fill: var(--sub); font-size: 9px; }
   .legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin-top: 0.5rem; font-size: 0.78rem; color: #515154; }
   .legend b { color: var(--ink); }
+  .legend-item { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .legend-swatch { width: 10px; height: 10px; border-radius: 3px; flex: 0 0 auto; }
+  .stack-band { opacity: 0; animation: fadeBand 0.6s ease forwards; }
+  @keyframes fadeBand { to { opacity: 1; } }
 
   @media (max-width: 720px) {
     .sidebar { width: 100%; min-width: 0; border-radius: 0; }
@@ -444,6 +448,15 @@
   // Visualization window for the trending graphs
   var TREND_START = '2026-01-01';
   var TREND_END = new Date().toISOString().split('T')[0];
+
+  // Stable per-project color palette (for the "Projects by Date" legend/chart)
+  var PROJECT_COLORS = ['#0b84a5', '#f6c85f', '#6f4e7c', '#ca6b09', '#00a278', '#d56f2a', '#4e79a7', '#e15759', '#b07aa1', '#59a14f', '#f28e2b', '#76b7b2'];
+  function projectColor(projectId) {
+    for (var i = 0; i < db.projects.length; i++) {
+      if (db.projects[i].id === projectId) return PROJECT_COLORS[i % PROJECT_COLORS.length];
+    }
+    return '#666';
+  }
 
   function projectCategory(project) {
     return (project.category === 'Personal') ? 'Personal' : 'Enterprise';
@@ -648,26 +661,90 @@
     return { byDate: buckets, perProject: projectBuckets, projectTotals: projectTotals };
   }
 
-  // Renders the "Projects by Date" aggregate chart above the tabs.
+  // Build the SVG polygon path for one stacked band between top[] and bottom[].
+  function stackBandPath(top, bottom, w, h, padX, padTop, padBottom, maxY) {
+    var n = top.length;
+    var innerW = w - padX * 2;
+    var innerH = h - padTop - padBottom;
+    var px = function (i) { return n <= 1 ? padX + innerW / 2 : padX + (i / (n - 1)) * innerW; };
+    var py = function (v) { return padTop + innerH - (v / maxY) * innerH; };
+    var d = '';
+    for (var i = 0; i < n; i++) d += (i === 0 ? 'M' : 'L') + px(i).toFixed(1) + ' ' + py(top[i]).toFixed(1);
+    for (var j = n - 1; j >= 0; j--) d += 'L' + px(j).toFixed(1) + ' ' + py(bottom[j]).toFixed(1);
+    return d + 'Z';
+  }
+
+  // Renders a per-project color-coded stacked area chart.
+  function renderStackedChart(parentEl, layers, dates, maxY) {
+    var w = 720, h = 150, padX = 8, padTop = 14, padBottom = 22;
+    var innerW = w - padX * 2, innerH = h - padTop - padBottom;
+    var px = function (i) { return dates.length <= 1 ? padX + innerW / 2 : padX + (i / (dates.length - 1)) * innerW; };
+    var py = function (v) { return padTop + innerH - (v / maxY) * innerH; };
+    var yTicks = 3;
+    var svg = '<svg class="byDate-svg" viewBox="0 0 ' + w + ' ' + h + '">';
+    for (var t = 0; t <= yTicks; t++) {
+      var yv = (maxY * t) / yTicks;
+      var yy = py(yv);
+      svg += '<line x1="' + padX + '" y1="' + yy + '" x2="' + (w - padX) + '" y2="' + yy + '" stroke="#ececf1" stroke-width="1"></line>';
+      svg += '<text class="chart-axis" x="' + (padX - 4) + '" y="' + (yy + 3) + '" text-anchor="end">' + (t === 0 ? '' : yv.toFixed(yv % 1 ? 1 : 0)) + '</text>';
+    }
+    [{ i: 0, a: 'start' }, { i: Math.floor(dates.length / 2), a: 'middle' }, { i: dates.length - 1, a: 'end' }].forEach(function (en) {
+      var x = px(en.i);
+      svg += '<text class="chart-axis" x="' + x + '" y="' + (h - 5) + '" text-anchor="' + en.a + '">' + shortDate(dates[en.i]) + '</text>';
+    });
+    layers.forEach(function (layer, j) {
+      var d = stackBandPath(layer.top, layer.bottom, w, h, padX, padTop, padBottom, maxY);
+      svg += '<path class="stack-band" d="' + d + '" fill="' + layer.color + '" fill-opacity="0.82" stroke="' +
+        layer.color + '" stroke-opacity="0.5" stroke-width="1" style="animation-delay:' + (j * 0.12) + 's"></path>';
+    });
+    svg += '</svg>';
+    parentEl.innerHTML = svg;
+  }
+
+  // Renders the "Projects by Date" chart: per-project colors + legend, projects worked since Jan 2026.
   function renderByDateChart() {
     var el = document.getElementById('byDateChart');
     var rangeEl = document.getElementById('byDateRange');
     if (!el) return;
     var agg = computeByDate();
-    var series = dailySeries(agg.byDate, TREND_START, TREND_END);
-    var total = series.reduce(function (a, p) { return a + p.y; }, 0);
+    var dates = allDatesBetween(TREND_START, TREND_END);
+
+    // Only projects actually worked since Jan 2026, sorted by accrued hours (desc).
+    var pids = db.projects.map(function (p) { return p.id; })
+      .filter(function (pid) { return (agg.projectTotals[pid] || 0) > 0; });
+    pids.sort(function (a, b) { return agg.projectTotals[b] - agg.projectTotals[a]; });
+
+    // Stacked cumulative bands across dates (one per project).
+    var running = new Array(dates.length).fill(0);
+    var layers = [];
+    var layerTops = [];
+    pids.forEach(function (pid, j) {
+      var band = new Array(dates.length);
+      for (var i = 0; i < dates.length; i++) {
+        var h = (agg.perProject[pid] || {})[dates[i]] || 0;
+        running[i] += h;
+        band[i] = running[i];
+      }
+      layers.push({
+        pid: pid,
+        color: projectColor(pid),
+        top: band,
+        bottom: j === 0 ? new Array(dates.length).fill(0) : layerTops[j - 1]
+      });
+      layerTops.push(band);
+    });
+    var maxY = Math.max.apply(null, running) || 1;
+    var total = pids.reduce(function (a, pid) { return a + agg.projectTotals[pid]; }, 0);
+
     rangeEl.textContent = shortDate(TREND_START) + ' – ' + shortDate(TREND_END) +
-      ' · Total ' + total.toFixed(1) + ' hrs across ' + Object.keys(agg.projectTotals).length + ' projects';
-    renderTrend(el, series, { width: 720, height: 150 });
-    var top = Object.keys(agg.projectTotals)
-      .map(function (pid) {
-        var p = db.projects.filter(function (x) { return x.id === pid; })[0];
-        return { name: p ? p.name : pid, hours: agg.projectTotals[pid] };
-      })
-      .sort(function (a, b) { return b.hours - a.hours; })
-      .slice(0, 6);
-    var legend = '<div class="legend">' + top.map(function (pr) {
-      return '<span><b>' + escapeHtml(pr.name) + '</b> · ' + pr.hours.toFixed(1) + ' hrs</span>';
+      ' · ' + pids.length + ' projects · ' + total.toFixed(1) + ' hrs';
+    renderStackedChart(el, layers, dates, maxY);
+
+    var legend = '<div class="legend">' + pids.map(function (pid) {
+      var p = db.projects.filter(function (x) { return x.id === pid; })[0];
+      var name = p ? p.name : pid;
+      return '<span class="legend-item"><span class="legend-swatch" style="background:' + projectColor(pid) + '"></span>' +
+        '<b>' + escapeHtml(name) + '</b> · ' + agg.projectTotals[pid].toFixed(1) + ' hrs since Jan</span>';
     }).join('') + '</div>';
     el.insertAdjacentHTML('beforeend', legend);
   }
@@ -719,7 +796,9 @@
 
     var html = '';
     visible.forEach(function (project) {
-      var projectLogs = db.logs.filter(function (l) { return l.projectId === project.id; });
+      var projectLogs = db.logs.filter(function (l) {
+        return l.projectId === project.id && l.date >= TREND_START && l.date <= TREND_END;
+      });
       var totalHours = projectLogs.reduce(function (sum, cur) { return sum + parseFloat(cur.timeSpent || 0); }, 0);
 
       html += '<div style="margin:0 0 2.5rem;padding-bottom:1.5rem;border-bottom:1px solid #eee;">';
@@ -728,7 +807,7 @@
       html += '<p class="goals" style="margin-bottom:0.5rem;"><strong>🎯 Core End Goal Target:</strong> ' +
               escapeHtml(project.endGoal || 'None Specified') +
               '<span style="margin:0 10px;color:#ccc">|</span>' +
-              '<strong>⏳ Accrued Overhead:</strong> ' + totalHours.toFixed(2) + ' Hours Total</p>';
+              '<strong>⏳ Accrued Overhead:</strong> ' + totalHours.toFixed(2) + ' Hours since Jan 2026</p>';
       html += '<p class="proj-website"><strong>🔗 Website:</strong> ' + buildWebsiteLink(project.website) + '</p>';
       html += '<div style="margin:0 0 1rem;"><strong style="font-size:0.85rem;">🖱️ Platforms:</strong> ' +
               buildPlatformBadges(project.platforms) + '</div>';
