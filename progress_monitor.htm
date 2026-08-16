@@ -80,6 +80,8 @@
   .btn-green { background: #16a34a; }
   .btn-edit { background: #e8e8ed; color: #424245; padding: 0.32rem 0.8rem; font-size: 0.8rem; margin-left: 0.75rem; }
   .btn-edit:hover { background: #dcdce1; opacity: 1; }
+  .btn-quick { background: rgba(0, 113, 227, 0.08); color: var(--blue); border: 1px solid rgba(0, 113, 227, 0.32); padding: 0.32rem 0.8rem; font-size: 0.8rem; margin-left: 0.5rem; border-radius: 980px; cursor: pointer; }
+  .btn-quick:hover { background: rgba(0, 113, 227, 0.16); }
   .btn-cancel { background: #e8e8ed; color: #424245; padding: 0.32rem 0.8rem; font-size: 0.8rem; }
   .btn-cancel:hover { background: #dcdce1; opacity: 1; }
 
@@ -789,7 +791,9 @@
 
       html += '<div style="margin:0 0 2.5rem;padding-bottom:1.5rem;border-bottom:1px solid #eee;">';
       html += '<h3 class="proj-h3">📁 ' + escapeHtml(project.name) +
-              '<button type="button" class="btn-edit" data-edit="' + escapeHtml(project.id) + '">✏️ Edit</button></h3>';
+              '<button type="button" class="btn-edit" data-edit="' + escapeHtml(project.id) + '">✏️ Edit</button>' +
+              '<button type="button" class="btn-quick" data-quick="0.5" data-quick-proj="' + escapeHtml(project.id) + '">+30m</button>' +
+              '<button type="button" class="btn-quick" data-quick="1" data-quick-proj="' + escapeHtml(project.id) + '">+60m</button></h3>';
       html += '<p class="goals" style="margin-bottom:0.5rem;"><strong>🎯 Core End Goal Target:</strong> ' +
               escapeHtml(project.endGoal || 'None Specified') +
               '<span style="margin:0 10px;color:#ccc">|</span>' +
@@ -872,19 +876,43 @@
 
   // Edit button delegation (dashboard innerHTML is re-rendered, so listen on the container).
   dashboard.addEventListener('click', function (e) {
-    var btn = e.target.closest ? e.target.closest('.btn-edit') : null;
-    if (!btn || !btn.dataset.edit) return;
-    var project = db.projects.filter(function (p) { return p.id === btn.dataset.edit; })[0];
-    if (!project) return;
-    editingProjectId.value = project.id;
-    document.getElementById('projName').value = project.name;
-    document.getElementById('endGoal').value = project.endGoal || '';
-    projCategory.value = projectCategory(project);
-    projWebsite.value = project.website || '';
-    setPlatformCheckboxes(project.platforms);
-    projSubmitBtn.textContent = 'Save Project Changes';
-    projCancelBtn.style.display = 'inline-block';
-    showPanel('setup');
+    var editBtn = e.target.closest ? e.target.closest('.btn-edit') : null;
+    if (editBtn && editBtn.dataset.edit) {
+      var project = db.projects.filter(function (p) { return p.id === editBtn.dataset.edit; })[0];
+      if (!project) return;
+      editingProjectId.value = project.id;
+      document.getElementById('projName').value = project.name;
+      document.getElementById('endGoal').value = project.endGoal || '';
+      projCategory.value = projectCategory(project);
+      projWebsite.value = project.website || '';
+      setPlatformCheckboxes(project.platforms);
+      projSubmitBtn.textContent = 'Save Project Changes';
+      projCancelBtn.style.display = 'inline-block';
+      showPanel('setup');
+      return;
+    }
+    var qbtn = e.target.closest ? e.target.closest('.btn-quick') : null;
+    if (qbtn && qbtn.dataset.quick) {
+      var qtime = parseFloat(qbtn.dataset.quick);
+      var qpid = qbtn.dataset.quickProj;
+      var today = new Date().toISOString().split('T')[0];
+      fetch(API_BASE + '?route=log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectId: qpid,
+          date: today,
+          timeSpent: qtime,
+          tasks: 'Quick daily entry',
+          accomplishments: qtime + ' hour(s) added via quick-entry button'
+        })
+      })
+        .then(function (r) { return r.json(); })
+        .then(function () {
+          refreshData(function () { showMsg(qtime + ' hour(s) added for today.', 'ok', 3000); });
+        })
+        .catch(function () { showMsg('Failed to add quick time entry.', 'err', 4000); });
+    }
   });
 
   // Tab switching (Enterprise / Personal)
