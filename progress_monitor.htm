@@ -49,86 +49,120 @@
   .proj-website a { color: #0070f3; text-decoration: none; font-weight: 600; }
   .proj-website a:hover { text-decoration: underline; }
   .no-website { color: #999; font-style: italic; }
+  /* Floating sidebar (Setup/Edit + Log execution controls) */
+  .content { transition: padding-right 0.25s ease; }
+  @media (min-width: 1100px) {
+    .content.sidebar-open { padding-right: 430px; }
+  }
+  @media (max-width: 1099px) {
+    .content.sidebar-open { padding-right: 0; }
+  }
+  .sidebar-toggle {
+    position: fixed; right: 1rem; bottom: 1rem; z-index: 1001;
+    background: #0070f3; color: #fff; border: none; border-radius: 50px;
+    padding: 0.75rem 1.15rem; font-size: 0.9rem; line-height: 1;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3); cursor: pointer;
+  }
+  .sidebar-toggle:hover { opacity: 0.92; }
+  .sidebar {
+    position: fixed; top: 0; right: 0; height: 100vh; width: 400px;
+    max-width: 92vw; background: #f9f9f9; border-left: 1px solid #ccc;
+    box-shadow: -8px 0 22px rgba(0, 0, 0, 0.18); box-sizing: border-box;
+    padding: 1.2rem 1.4rem 3rem; overflow-y: auto; z-index: 1000;
+    transform: translateX(105%); transition: transform 0.28s ease;
+  }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .sidebar-head h2 { margin: 0; font-size: 1.15rem; }
+  .sidebar-close { background: #6b7280; padding: 0.4rem 0.7rem; font-size: 0.9rem; }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap content" id="content">
   <a class="back" href="/">&larr; Back to AniShiv World</a>
   <h1>⚡ In-Memory Daily Project Progress Matrix</h1>
   <div id="msg" class="msg"></div>
 
-  <div class="grid">
-    <!-- Panel A: Engine Infrastructure Setup -->
-    <div class="panel">
-      <h2>➕ Setup / ✏️ Edit Project Profile</h2>
-      <form id="form-project">
-        <input type="hidden" id="editingProjectId" value="" />
-        <label>Project Name:</label>
-        <input type="text" id="projName" placeholder="e.g., E-Commerce Infrastructure Engine" required />
-        <label>End Goal Architecture:</label>
-        <textarea id="endGoal" rows="4" placeholder="e.g., Deliver zero-latency shopping session workflows..."></textarea>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-          <div>
-            <label>Tab / Category:</label>
-            <select id="projCategory">
-              <option value="Enterprise" selected>🏢 Enterprise</option>
-              <option value="Personal">🏠 Personal</option>
-            </select>
-          </div>
-          <div>
-            <label>Website Link:</label>
-            <input type="url" id="projWebsite" placeholder="e.g., https://example.com" />
-          </div>
-        </div>
-        <label>Project Platforms (select all that apply):</label>
-        <div class="platform-grid">
-          <label><input type="checkbox" class="plat-cb" value="Desktop"><span>🖥️ Desktop</span></label>
-          <label><input type="checkbox" class="plat-cb" value="Mobile"><span>📱 Mobile</span></label>
-          <label><input type="checkbox" class="plat-cb" value="Web"><span>🌐 Web</span></label>
-          <label><input type="checkbox" class="plat-cb" value="eCommerce"><span>🛒 eCommerce</span></label>
-          <label><input type="checkbox" class="plat-cb" value="AI"><span>🤖 AI</span></label>
-          <label><input type="checkbox" class="plat-cb" value="Sports"><span>⚽ Sports</span></label>
-        </div>
-        <div>
-          <button type="submit" class="btn-blue" id="projSubmitBtn">Initialize Project</button>
-          <button type="button" class="btn-cancel" id="projCancelBtn" style="display:none;">Cancel Edit</button>
-        </div>
-      </form>
-    </div>
-
-    <!-- Panel B: Production Status Management Log Entries -->
-    <div class="panel">
-      <h2>📝 Log Daily Execution Progress</h2>
-      <form id="form-log">
-        <label>Target Project Reference:</label>
-        <select id="selectedProj"></select>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-          <div>
-            <label>Log Date:</label>
-            <input type="date" id="logDate" required />
-          </div>
-          <div>
-            <label>Time Expended (Hours):</label>
-            <input type="number" id="timeSpent" step="0.25" min="0" placeholder="e.g., 3.5" required />
-          </div>
-        </div>
-        <label>Daily Tasks Attempted:</label>
-        <textarea id="tasks" rows="3" placeholder="List current operational metrics worked on..."></textarea>
-        <label>Concrete Accomplishments:</label>
-        <textarea id="accomplishments" rows="3" placeholder="What target milestones did you finalize today?"></textarea>
-        <button type="submit" class="btn-green">Commit Active Track Log</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Panel C: Real-Time State Data Visualization Grid Layout -->
+  <!-- Main content: Live Operational Dashboard -->
   <h2>📊 Live Operational Dashboard Matrix</h2>
   <div class="tabs">
     <button type="button" class="tab active" data-tab="Enterprise">🏢 Enterprise<span class="count" id="count-Enterprise">0</span></button>
     <button type="button" class="tab" data-tab="Personal">🏠 Personal<span class="count" id="count-Personal">0</span></button>
   </div>
   <div class="dash" id="dashboard">
-    <p class="empty">No tracking projects found. Initialize an engine index above to start parsing records.</p>
+    <p class="empty">No tracking projects found. Use the floating form controls to add a project profile.</p>
+  </div>
+</div>
+
+<!-- Floating sidebar: Setup/Edit + Log Daily Execution controls -->
+<button type="button" id="sidebarToggle" class="sidebar-toggle" title="Open project form controls">🧰 Open Forms</button>
+
+<div class="sidebar" id="progressSidebar" aria-hidden="true">
+  <div class="sidebar-head">
+    <h2>🧰 Project Controls</h2>
+    <button type="button" id="sidebarClose" class="sidebar-close" title="Close sidebar">✕</button>
+  </div>
+
+  <!-- Panel A: Engine Infrastructure Setup -->
+  <div class="panel">
+    <h2>➕ Setup / ✏️ Edit Project Profile</h2>
+    <form id="form-project">
+      <input type="hidden" id="editingProjectId" value="" />
+      <label>Project Name:</label>
+      <input type="text" id="projName" placeholder="e.g., E-Commerce Infrastructure Engine" required />
+      <label>End Goal Architecture:</label>
+      <textarea id="endGoal" rows="4" placeholder="e.g., Deliver zero-latency shopping session workflows..."></textarea>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div>
+          <label>Tab / Category:</label>
+          <select id="projCategory">
+            <option value="Enterprise" selected>🏢 Enterprise</option>
+            <option value="Personal">🏠 Personal</option>
+          </select>
+        </div>
+        <div>
+          <label>Website Link:</label>
+          <input type="url" id="projWebsite" placeholder="e.g., https://example.com" />
+        </div>
+      </div>
+      <label>Project Platforms (select all that apply):</label>
+      <div class="platform-grid">
+        <label><input type="checkbox" class="plat-cb" value="Desktop"><span>🖥️ Desktop</span></label>
+        <label><input type="checkbox" class="plat-cb" value="Mobile"><span>📱 Mobile</span></label>
+        <label><input type="checkbox" class="plat-cb" value="Web"><span>🌐 Web</span></label>
+        <label><input type="checkbox" class="plat-cb" value="eCommerce"><span>🛒 eCommerce</span></label>
+        <label><input type="checkbox" class="plat-cb" value="AI"><span>🤖 AI</span></label>
+        <label><input type="checkbox" class="plat-cb" value="Sports"><span>⚽ Sports</span></label>
+      </div>
+      <div>
+        <button type="submit" class="btn-blue" id="projSubmitBtn">Initialize Project</button>
+        <button type="button" class="btn-cancel" id="projCancelBtn" style="display:none;">Cancel Edit</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Panel B: Production Status Management Log Entries -->
+  <div class="panel">
+    <h2>📝 Log Daily Execution Progress</h2>
+    <form id="form-log">
+      <label>Target Project Reference:</label>
+      <select id="selectedProj"></select>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div>
+          <label>Log Date:</label>
+          <input type="date" id="logDate" required />
+        </div>
+        <div>
+          <label>Time Expended (Hours):</label>
+          <input type="number" id="timeSpent" step="0.25" min="0" placeholder="e.g., 3.5" required />
+        </div>
+      </div>
+      <label>Daily Tasks Attempted:</label>
+      <textarea id="tasks" rows="3" placeholder="List current operational metrics worked on..."></textarea>
+      <label>Concrete Accomplishments:</label>
+      <textarea id="accomplishments" rows="3" placeholder="What target milestones did you finalize today?"></textarea>
+      <button type="submit" class="btn-green">Commit Active Track Log</button>
+    </form>
   </div>
 </div>
 
@@ -149,6 +183,24 @@
   var projCancelBtn = document.getElementById('projCancelBtn');
   var projCategory = document.getElementById('projCategory');
   var projWebsite = document.getElementById('projWebsite');
+
+  // Floating sidebar bindings
+  var contentEl = document.getElementById('content');
+  var sidebar = document.getElementById('progressSidebar');
+  var sidebarToggle = document.getElementById('sidebarToggle');
+  var sidebarClose = document.getElementById('sidebarClose');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    contentEl.classList.add('sidebar-open');
+    sidebar.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    contentEl.classList.remove('sidebar-open');
+    sidebar.setAttribute('aria-hidden', 'true');
+  }
 
   // Active dashboard tab (legacy projects w/o a category default to Enterprise)
   var activeTab = 'Enterprise';
@@ -340,6 +392,10 @@
     resetProjectForm();
   });
 
+  // Open / close the floating sidebar
+  sidebarToggle.addEventListener('click', openSidebar);
+  sidebarClose.addEventListener('click', closeSidebar);
+
   // Edit button delegation (dashboard innerHTML is re-rendered, so listen on the container).
   dashboard.addEventListener('click', function (e) {
     var btn = e.target.closest ? e.target.closest('.btn-edit') : null;
@@ -354,7 +410,7 @@
     setPlatformCheckboxes(project.platforms);
     projSubmitBtn.textContent = 'Save Project Changes';
     projCancelBtn.style.display = 'inline-block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    openSidebar();
   });
 
   // Tab switching (Enterprise / Personal)
@@ -396,6 +452,9 @@
 
   // Initialize date to today
   document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
+
+  // Foundations: float the sidebar open on wide screens, closed (tucked) on small screens.
+  if (window.innerWidth >= 1100) { openSidebar(); } else { closeSidebar(); }
 
   // Hydrate application configuration contexts from the remote PHP runtime memory engine
   refreshData();
