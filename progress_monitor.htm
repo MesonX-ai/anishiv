@@ -178,12 +178,13 @@
   }
   .msg.ok { background: #e7f6ec; color: #0f6b34; display: block; }
   .msg.err { background: #fdecec; color: #b00020; display: block; }
-  /* Floating frosted-glass sidebar overlay (50% of the page) */
+  /* Floating frosted-glass sidebar overlay (height matches the active form) */
   .sidebar {
     position: fixed;
     top: 0;
     right: 0;
-    height: 100vh;
+    height: auto;
+    max-height: calc(100vh - 2.5rem);
     width: min(50vw, 620px);
     min-width: 340px;
     background: rgba(245, 245, 247, 0.82);
@@ -709,8 +710,10 @@
     var agg = computeByDate();
     var dates = allDatesBetween(TREND_START, TREND_END);
 
-    // Only projects actually worked since Jan 2026, sorted by accrued hours (desc).
-    var pids = db.projects.map(function (p) { return p.id; })
+    // Only projects actually worked since Jan 2026 (within the active tab), sorted by accrued hours (desc).
+    var pids = db.projects
+      .filter(function (p) { return projectCategory(p) === activeTab; })
+      .map(function (p) { return p.id; })
       .filter(function (pid) { return (agg.projectTotals[pid] || 0) > 0; });
     pids.sort(function (a, b) { return agg.projectTotals[b] - agg.projectTotals[a]; });
 
@@ -786,7 +789,7 @@
     // Filter the dashboard cards by the currently selected tab.
     var visible = db.projects.filter(function (p) { return projectCategory(p) === activeTab; });
 
-    // Refresh the "Projects by Date" aggregate chart (all projects, regardless of tab).
+    // Refresh the "Projects by Date" aggregate chart — filtered to the active tab.
     renderByDateChart();
 
     if (visible.length === 0) {
@@ -817,12 +820,10 @@
         html += '<p class="empty" style="margin-left:0.5rem;">No logs registered to this project profile yet.</p>';
       } else {
         html += '<div style="overflow-x:auto;"><table>';
-        html += '<thead><tr><th style="width:150px">Target Date</th><th style="width:120px">Tracked Effort</th><th>Engine Tasks</th><th>Milestones &amp; Accomplishments</th></tr></thead>';
+        html += '<thead><tr><th>Engine Tasks</th><th>Milestones &amp; Accomplishments</th></tr></thead>';
         html += '<tbody>';
         projectLogs.forEach(function (log) {
           html += '<tr>';
-          html += '<td class="date">' + escapeHtml(log.date) + '</td>';
-          html += '<td class="hours">' + escapeHtml(log.timeSpent) + ' hrs</td>';
           html += '<td style="white-space:pre-wrap">' + escapeHtml(log.tasks) + '</td>';
           html += '<td style="white-space:pre-wrap">' + escapeHtml(log.accomplishments) + '</td>';
           html += '</tr>';
