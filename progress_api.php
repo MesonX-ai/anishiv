@@ -32,19 +32,24 @@ define('STORAGE_FILE', __DIR__ . '/projects_backup.json');
  * Resolves active state metrics from fast RAM buffer; handles transparent disk recovery fallback.
  */
 function get_tracker_data() {
-    // Attempt high-speed retrieval from APCu cache structures
+    $mtime = @filemtime(STORAGE_FILE);
+
+    // Attempt high-speed retrieval from APCu cache — only if it matches the file version.
     if (function_exists('apcu_fetch') && apcu_exists('tracker_db')) {
-        return apcu_fetch('tracker_db');
+        $cached = apcu_fetch('tracker_db');
+        if (is_array($cached) && isset($cached['_mtime']) && $cached['_mtime'] === $mtime) {
+            return $cached['_data'];
+        }
     }
 
     // Recovery Phase: Read back snapshot data profile from file system state
-    if (file_exists(STORAGE_FILE)) {
+    if ($mtime !== false) {
         $disk_json = @file_get_contents(STORAGE_FILE);
         $decoded = json_decode($disk_json, true);
         if (is_array($decoded)) {
-            // Warm cache pool back up instantly inside system memory
+            // Warm memory cache with the file version marker so stale cache can't hide new data.
             if (function_exists('apcu_store')) {
-                apcu_store('tracker_db', $decoded);
+                apcu_store('tracker_db', ['_mtime' => $mtime, '_data' => $decoded]);
             }
             return $decoded;
         }
@@ -59,10 +64,10 @@ function get_tracker_data() {
  * Commits active memory indexes simultaneously to the RAM cache thread and file system disk.
  */
 function save_tracker_data($data) {
-    if (function_exists('apcu_store')) {
-        apcu_store('tracker_db', $data);
-    }
     file_put_contents(STORAGE_FILE, json_encode($data, JSON_PRETTY_PRINT));
+    if (function_exists('apcu_store')) {
+        apcu_store('tracker_db', ['_mtime' => @filemtime(STORAGE_FILE), '_data' => $data]);
+    }
 }
 
 $route = $_GET['route'] ?? 'data';
