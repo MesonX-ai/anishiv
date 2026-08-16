@@ -955,8 +955,8 @@
   // Initialize date to today
   document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
 
-  // Foundations: show the Setup panel on wide screens, keep the tabs only on small screens.
-  if (window.innerWidth >= 1100) { showPanel('setup'); } else { closeSidebar(); }
+  // Foundations: keep the Project Controls sidebar hidden on startup.
+  closeSidebar();
 
   // Hydrate application configuration contexts from the remote PHP runtime memory engine
   refreshData();
