@@ -689,7 +689,7 @@ In a world where colors dance and play, a loving couple finds their way through 
 		<h3>YouTube Channel</h3>
 		<div class="jfmod-content"><div class="modjoomimg">
   <div id="slidewrap">
-    <div id="slideshow67">
+    <div id="slideshow67" style="position:relative;">
 
     	<ul class="carousel">  
 			<li>
@@ -768,17 +768,49 @@ In a world where colors dance and play, a loving couple finds their way through 
 				</a>
 			</li>
 		</ul>
+        <a href="#" class="jcarousel-prev-horizontal" id="yt-prev">&laquo;</a>
+        <a href="#" class="jcarousel-next-horizontal" id="yt-next">&raquo;</a>
     </div>
   </div>
     <script type="text/javascript" src="js/jquery.jcarousel.min.js"></script>
     <script type="text/javascript">
 		jQuery(document).ready(function() {
-			    jQuery('.carousel').jcarousel({
-                        auto: 1, // Scrolls every 1 second
-                        animation: 2000, // Animation takes 2 seconds
-                        easing: 'linear', // Uses a linear easing effect
-                        wrap: 'circular' // Optional: Creates a continuous loop
-                });
+			var carousel = jQuery('.carousel');
+			var ytInterval;
+			
+			carousel.jcarousel({
+				animation: 2000,
+				easing: 'linear',
+				wrap: 'circular'
+			});
+			
+			function startYTScroll() {
+				ytInterval = setInterval(function() {
+					carousel.jcarousel('scroll', '+=1');
+				}, 2000);
+			}
+			
+			function stopYTScroll() {
+				clearInterval(ytInterval);
+			}
+			
+			jQuery('#yt-prev').on('click', function(e) {
+				e.preventDefault();
+				stopYTScroll();
+				carousel.jcarousel('scroll', '-=1');
+				startYTScroll();
+			});
+			
+			jQuery('#yt-next').on('click', function(e) {
+				e.preventDefault();
+				stopYTScroll();
+				carousel.jcarousel('scroll', '+=1');
+				startYTScroll();
+			});
+			
+			carousel.on('mouseenter', stopYTScroll).on('mouseleave', startYTScroll);
+			
+			startYTScroll();
 		});
 	</script>
 	
