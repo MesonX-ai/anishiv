@@ -690,8 +690,7 @@ In a world where colors dance and play, a loving couple finds their way through 
 		<div class="jfmod-content"><div class="modjoomimg">
   <div id="slidewrap">
     <div id="slideshow67" style="position:relative;">
-
-    	<ul class="carousel">  
+     	<ul class="carousel">  
 			<li>
 				<a href="https://www.youtube.com/watch?v=Yd-T2e5Ovx4" target="_blank" rel="noopener noreferrer">
 					<img src="https://i2.ytimg.com/vi/Yd-T2e5Ovx4/hqdefault.jpg" alt="Mesonsoft LLC" />
@@ -768,49 +767,27 @@ In a world where colors dance and play, a loving couple finds their way through 
 				</a>
 			</li>
 		</ul>
-        <a href="#" class="jcarousel-prev-horizontal" id="yt-prev">&laquo;</a>
-        <a href="#" class="jcarousel-next-horizontal" id="yt-next">&raquo;</a>
     </div>
   </div>
     <script type="text/javascript" src="js/jquery.jcarousel.min.js"></script>
     <script type="text/javascript">
 		jQuery(document).ready(function() {
-			var carousel = jQuery('.carousel');
-			var ytInterval;
+			var $carousel = jQuery('.carousel');
 			
-			carousel.jcarousel({
-				animation: 2000,
+			$carousel.jcarousel({
+				animation: 600,
 				easing: 'linear',
-				wrap: 'circular'
+				wrap: 'circular',
+				auto: 2,
+				buttonNextHTML: '<a href="#" class="jcarousel-next jcarousel-next-horizontal" id="yt-next">&raquo;</a>',
+				buttonPrevHTML: '<a href="#" class="jcarousel-prev jcarousel-prev-horizontal" id="yt-prev">&laquo;</a>'
 			});
 			
-			function startYTScroll() {
-				ytInterval = setInterval(function() {
-					carousel.jcarousel('scroll', '+=1');
-				}, 2000);
-			}
-			
-			function stopYTScroll() {
-				clearInterval(ytInterval);
-			}
-			
-			jQuery('#yt-prev').on('click', function(e) {
-				e.preventDefault();
-				stopYTScroll();
-				carousel.jcarousel('scroll', '-=1');
-				startYTScroll();
+			$carousel.on('mouseenter', function() {
+				$carousel.jcarousel('pauseAuto');
+			}).on('mouseleave', function() {
+				$carousel.jcarousel('startAuto');
 			});
-			
-			jQuery('#yt-next').on('click', function(e) {
-				e.preventDefault();
-				stopYTScroll();
-				carousel.jcarousel('scroll', '+=1');
-				startYTScroll();
-			});
-			
-			carousel.on('mouseenter', stopYTScroll).on('mouseleave', startYTScroll);
-			
-			startYTScroll();
 		});
 	</script>
 	
