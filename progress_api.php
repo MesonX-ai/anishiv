@@ -8,9 +8,10 @@
  *   - JSON Transactional Disk State Fallback (crash-safe persistence)
  *
  * Endpoints (query-parameter routing so it runs on plain shared hosting):
- *   GET  progress_api.php?route=data      -> full {projects, logs} dataset
- *   POST progress_api.php?route=project   -> create a project {name, endGoal}
- *   POST progress_api.php?route=log       -> add a work log {projectId, date, timeSpent, tasks, accomplishments}
+ *   GET  progress_api.php?route=data            -> full {projects, logs} dataset
+ *   POST progress_api.php?route=project         -> create a project {name, endGoal, platforms[]}
+ *   POST progress_api.php?route=project_update  -> edit a project {id, name, endGoal, platforms[]}
+ *   POST progress_api.php?route=log             -> add a work log {projectId, date, timeSpent, tasks, accomplishments}
  */
 
 // Configure cross-origin browser policies for dashboard communication
@@ -92,13 +93,59 @@ if ($route === 'project' && $method === 'POST') {
     $new_project = [
         'id' => uniqid('p_'),
         'name' => $input['name'],
-        'endGoal' => $input['endGoal'] ?? ''
+        'endGoal' => $input['endGoal'] ?? '',
+        'platforms' => isset($input['platforms']) && is_array($input['platforms'])
+            ? array_values(array_map('strval', $input['platforms']))
+            : []
     ];
 
     $current_db['projects'][] = $new_project;
     save_tracker_data($current_db);
 
     echo json_encode($new_project);
+    exit;
+}
+
+/**
+ * ROUTE: project_update (POST)
+ * Edits an existing project profile record (name, end goal, and platform breakdown).
+ */
+if ($route === 'project_update' && $method === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    if (empty($input['id'])) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Project profile update requires a valid project identifier ID']);
+        exit;
+    }
+
+    $updated = null;
+    foreach ($current_db['projects'] as &$proj) {
+        if ($proj['id'] === $input['id']) {
+            if (isset($input['name']) && trim($input['name']) !== '') {
+                $proj['name'] = trim($input['name']);
+            }
+            if (array_key_exists('endGoal', $input)) {
+                $proj['endGoal'] = $input['endGoal'] ?? '';
+            }
+            if (isset($input['platforms'])) {
+                $proj['platforms'] = is_array($input['platforms'])
+                    ? array_values(array_map('strval', $input['platforms']))
+                    : [];
+            }
+            $updated = $proj;
+            break;
+        }
+    }
+    unset($proj);
+
+    if ($updated === null) {
+        http_response_code(404);
+        echo json_encode(['error' => 'Project profile with the supplied ID could not be located for update']);
+        exit;
+    }
+
+    save_tracker_data($current_db);
+    echo json_encode($updated);
     exit;
 }
 

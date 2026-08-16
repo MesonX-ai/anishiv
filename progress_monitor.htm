@@ -32,6 +32,15 @@
   .msg { padding: 0.6rem 1rem; border-radius: 4px; margin-bottom: 1rem; display: none; font-size: 0.95rem; }
   .msg.ok { background: #e7f7ef; color: #0f7a4d; display: block; }
   .msg.err { background: #fdecec; color: #b02a37; display: block; }
+  .platform-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 1rem; }
+  @media (max-width: 560px) { .platform-grid { grid-template-columns: repeat(2, 1fr); } }
+  .platform-grid label { display: flex; align-items: center; gap: 0.4rem; margin: 0; font-weight: normal; background: #fff; border: 1px solid #d6d9e0; padding: 0.45rem 0.6rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+  .platform-grid label:hover { border-color: #0070f3; background: #f0f7ff; }
+  .platform-grid input[type="checkbox"] { margin: 0; width: auto; }
+  .badge-plat { display: inline-block; background: #eef4ff; color: #1f3a93; border: 1px solid #c9d8f5; border-radius: 20px; padding: 0.15rem 0.6rem; margin: 0 0.25rem 0.2rem 0; font-size: 0.8rem; }
+  .no-plat { color: #999; font-size: 0.85rem; }
+  .btn-edit { background: #6b7280; padding: 0.3rem 0.8rem; font-size: 0.8rem; margin-left: 0.75rem; }
+  .btn-cancel { background: #9ca3af; padding: 0.3rem 0.8rem; font-size: 0.8rem; }
 </style>
 </head>
 <body>
@@ -43,13 +52,26 @@
   <div class="grid">
     <!-- Panel A: Engine Infrastructure Setup -->
     <div class="panel">
-      <h2>🆕 Setup New Project Profile</h2>
+      <h2>➕ Setup / ✏️ Edit Project Profile</h2>
       <form id="form-project">
+        <input type="hidden" id="editingProjectId" value="" />
         <label>Project Name:</label>
         <input type="text" id="projName" placeholder="e.g., E-Commerce Infrastructure Engine" required />
         <label>End Goal Architecture:</label>
         <textarea id="endGoal" rows="4" placeholder="e.g., Deliver zero-latency shopping session workflows..."></textarea>
-        <button type="submit" class="btn-blue">Initialize Project</button>
+        <label>Project Platforms (select all that apply):</label>
+        <div class="platform-grid">
+          <label><input type="checkbox" class="plat-cb" value="Desktop"><span>🖥️ Desktop</span></label>
+          <label><input type="checkbox" class="plat-cb" value="Mobile"><span>📱 Mobile</span></label>
+          <label><input type="checkbox" class="plat-cb" value="Web"><span>🌐 Web</span></label>
+          <label><input type="checkbox" class="plat-cb" value="eCommerce"><span>🛒 eCommerce</span></label>
+          <label><input type="checkbox" class="plat-cb" value="AI"><span>🤖 AI</span></label>
+          <label><input type="checkbox" class="plat-cb" value="Sports"><span>⚽ Sports</span></label>
+        </div>
+        <div>
+          <button type="submit" class="btn-blue" id="projSubmitBtn">Initialize Project</button>
+          <button type="button" class="btn-cancel" id="projCancelBtn" style="display:none;">Cancel Edit</button>
+        </div>
       </form>
     </div>
 
@@ -96,6 +118,45 @@
   var formProject = document.getElementById('form-project');
   var formLog = document.getElementById('form-log');
 
+  // Editable project form bindings
+  var editingProjectId = document.getElementById('editingProjectId');
+  var projSubmitBtn = document.getElementById('projSubmitBtn');
+  var projCancelBtn = document.getElementById('projCancelBtn');
+
+  // Platform breakdown options with their display icons
+  var PLATFORM_META = {
+    'Desktop':   { icon: '🖥️', name: 'Desktop' },
+    'Mobile':    { icon: '📱', name: 'Mobile' },
+    'Web':       { icon: '🌐', name: 'Web' },
+    'eCommerce': { icon: '🛒', name: 'eCommerce' },
+    'AI':        { icon: '🤖', name: 'AI' },
+    'Sports':    { icon: '⚽', name: 'Sports' }
+  };
+
+  function getSelectedPlatforms() {
+    var out = [];
+    document.querySelectorAll('.plat-cb').forEach(function (cb) {
+      if (cb.checked) out.push(cb.value);
+    });
+    return out;
+  }
+
+  function setPlatformCheckboxes(values) {
+    var selected = Array.isArray(values) ? values : [];
+    document.querySelectorAll('.plat-cb').forEach(function (cb) {
+      cb.checked = selected.indexOf(cb.value) !== -1;
+    });
+  }
+
+  function resetProjectForm() {
+    editingProjectId.value = '';
+    document.getElementById('projName').value = '';
+    document.getElementById('endGoal').value = '';
+    document.querySelectorAll('.plat-cb').forEach(function (cb) { cb.checked = false; });
+    projSubmitBtn.textContent = 'Initialize Project';
+    projCancelBtn.style.display = 'none';
+  }
+
   function showMsg(text, type, ms) {
     elMsg.textContent = text;
     elMsg.className = 'msg ' + (type || 'ok');
@@ -122,6 +183,16 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
+  // Renders the selected platform chips (with icons) for a project card.
+  function buildPlatformBadges(platforms) {
+    var list = Array.isArray(platforms) ? platforms : [];
+    if (list.length === 0) return '<span class="no-plat">None selected</span>';
+    return list.map(function (key) {
+      var meta = PLATFORM_META[key] || { icon: '📦', name: key };
+      return '<span class="badge-plat">' + meta.icon + ' ' + escapeHtml(meta.name) + '</span>';
+    }).join('');
+  }
+
   function render() {
     projSelect.innerHTML = '';
     db.projects.forEach(function (p) {
@@ -142,11 +213,14 @@
       var totalHours = projectLogs.reduce(function (sum, cur) { return sum + parseFloat(cur.timeSpent || 0); }, 0);
 
       html += '<div style="margin:0 0 2.5rem;padding-bottom:1.5rem;border-bottom:1px solid #eee;">';
-      html += '<h3 class="proj-h3">📁 ' + escapeHtml(project.name) + '</h3>';
-      html += '<p class="goals"><strong>🎯 Core End Goal Target:</strong> ' +
+      html += '<h3 class="proj-h3">📁 ' + escapeHtml(project.name) +
+              '<button type="button" class="btn-edit" data-edit="' + escapeHtml(project.id) + '">✏️ Edit</button></h3>';
+      html += '<p class="goals" style="margin-bottom:0.5rem;"><strong>🎯 Core End Goal Target:</strong> ' +
               escapeHtml(project.endGoal || 'None Specified') +
               '<span style="margin:0 10px;color:#ccc">|</span>' +
               '<strong>⏳ Accrued Overhead:</strong> ' + totalHours.toFixed(2) + ' Hours Total</p>';
+      html += '<div style="margin:0 0 1rem;"><strong style="font-size:0.85rem;">🖱️ Platforms:</strong> ' +
+              buildPlatformBadges(project.platforms) + '</div>';
 
       if (projectLogs.length === 0) {
         html += '<p class="empty" style="margin-left:0.5rem;">No logs registered to this project profile yet.</p>';
@@ -169,24 +243,51 @@
     dashboard.innerHTML = html;
   }
 
-  // Create project
+  // Create or update a project profile
   formProject.addEventListener('submit', function (e) {
     e.preventDefault();
     var name = document.getElementById('projName').value.trim();
     var goal = document.getElementById('endGoal').value.trim();
+    var platforms = getSelectedPlatforms();
     if (!name) return;
-    fetch(API_BASE + '?route=project', {
+
+    var editId = editingProjectId.value;
+    var route = editId ? 'project_update' : 'project';
+    var payload = { name: name, endGoal: goal, platforms: platforms };
+    if (editId) payload.id = editId;
+
+    fetch(API_BASE + '?route=' + route, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name, endGoal: goal })
+      body: JSON.stringify(payload)
     })
       .then(function (r) { return r.json(); })
       .then(function () {
-        document.getElementById('projName').value = '';
-        document.getElementById('endGoal').value = '';
-        refreshData(function () { showMsg('Project profile initialized successfully.', 'ok', 3000); });
+        resetProjectForm();
+        refreshData(function () {
+          showMsg(editId ? 'Project profile updated successfully.' : 'Project profile initialized successfully.', 'ok', 3000);
+        });
       })
-      .catch(function () { showMsg('Failed to create project.', 'err', 4000); });
+      .catch(function () { showMsg(editId ? 'Failed to update project.' : 'Failed to create project.', 'err', 4000); });
+  });
+
+  projCancelBtn.addEventListener('click', function () {
+    resetProjectForm();
+  });
+
+  // Edit button delegation (dashboard innerHTML is re-rendered, so listen on the container).
+  dashboard.addEventListener('click', function (e) {
+    var btn = e.target.closest ? e.target.closest('.btn-edit') : null;
+    if (!btn || !btn.dataset.edit) return;
+    var project = db.projects.filter(function (p) { return p.id === btn.dataset.edit; })[0];
+    if (!project) return;
+    editingProjectId.value = project.id;
+    document.getElementById('projName').value = project.name;
+    document.getElementById('endGoal').value = project.endGoal || '';
+    setPlatformCheckboxes(project.platforms);
+    projSubmitBtn.textContent = 'Save Project Changes';
+    projCancelBtn.style.display = 'inline-block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
   // Log daily progress
