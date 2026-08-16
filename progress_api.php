@@ -9,8 +9,8 @@
  *
  * Endpoints (query-parameter routing so it runs on plain shared hosting):
  *   GET  progress_api.php?route=data            -> full {projects, logs} dataset
- *   POST progress_api.php?route=project         -> create a project {name, endGoal, platforms[]}
- *   POST progress_api.php?route=project_update  -> edit a project {id, name, endGoal, platforms[]}
+ *   POST progress_api.php?route=project         -> create a project {name, endGoal, category, website, platforms[]}
+ *   POST progress_api.php?route=project_update  -> edit a project {id, name, endGoal, category, website, platforms[]}
  *   POST progress_api.php?route=log             -> add a work log {projectId, date, timeSpent, tasks, accomplishments}
  */
 
@@ -94,6 +94,8 @@ if ($route === 'project' && $method === 'POST') {
         'id' => uniqid('p_'),
         'name' => $input['name'],
         'endGoal' => $input['endGoal'] ?? '',
+        'category' => (($input['category'] ?? 'Enterprise') === 'Personal') ? 'Personal' : 'Enterprise',
+        'website' => trim((string)($input['website'] ?? '')),
         'platforms' => isset($input['platforms']) && is_array($input['platforms'])
             ? array_values(array_map('strval', $input['platforms']))
             : []
@@ -126,6 +128,12 @@ if ($route === 'project_update' && $method === 'POST') {
             }
             if (array_key_exists('endGoal', $input)) {
                 $proj['endGoal'] = $input['endGoal'] ?? '';
+            }
+            if (isset($input['category'])) {
+                $proj['category'] = ($input['category'] === 'Personal') ? 'Personal' : 'Enterprise';
+            }
+            if (array_key_exists('website', $input)) {
+                $proj['website'] = trim((string)($input['website'] ?? ''));
             }
             if (isset($input['platforms'])) {
                 $proj['platforms'] = is_array($input['platforms'])

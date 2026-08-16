@@ -41,6 +41,14 @@
   .no-plat { color: #999; font-size: 0.85rem; }
   .btn-edit { background: #6b7280; padding: 0.3rem 0.8rem; font-size: 0.8rem; margin-left: 0.75rem; }
   .btn-cancel { background: #9ca3af; padding: 0.3rem 0.8rem; font-size: 0.8rem; }
+  .tabs { display: flex; gap: 0.5rem; margin: 1.5rem 0 1rem; }
+  .tab { background: #e5e7eb; color: #374151; padding: 0.55rem 1.2rem; border-radius: 6px; }
+  .tab.active { background: #0070f3; color: #fff; }
+  .tab .count { opacity: 0.75; font-weight: normal; margin-left: 0.35rem; }
+  .proj-website { margin: 0 0 1rem; font-size: 0.9rem; }
+  .proj-website a { color: #0070f3; text-decoration: none; font-weight: 600; }
+  .proj-website a:hover { text-decoration: underline; }
+  .no-website { color: #999; font-style: italic; }
 </style>
 </head>
 <body>
@@ -59,6 +67,19 @@
         <input type="text" id="projName" placeholder="e.g., E-Commerce Infrastructure Engine" required />
         <label>End Goal Architecture:</label>
         <textarea id="endGoal" rows="4" placeholder="e.g., Deliver zero-latency shopping session workflows..."></textarea>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div>
+            <label>Tab / Category:</label>
+            <select id="projCategory">
+              <option value="Enterprise" selected>🏢 Enterprise</option>
+              <option value="Personal">🏠 Personal</option>
+            </select>
+          </div>
+          <div>
+            <label>Website Link:</label>
+            <input type="url" id="projWebsite" placeholder="e.g., https://example.com" />
+          </div>
+        </div>
         <label>Project Platforms (select all that apply):</label>
         <div class="platform-grid">
           <label><input type="checkbox" class="plat-cb" value="Desktop"><span>🖥️ Desktop</span></label>
@@ -102,6 +123,10 @@
 
   <!-- Panel C: Real-Time State Data Visualization Grid Layout -->
   <h2>📊 Live Operational Dashboard Matrix</h2>
+  <div class="tabs">
+    <button type="button" class="tab active" data-tab="Enterprise">🏢 Enterprise<span class="count" id="count-Enterprise">0</span></button>
+    <button type="button" class="tab" data-tab="Personal">🏠 Personal<span class="count" id="count-Personal">0</span></button>
+  </div>
   <div class="dash" id="dashboard">
     <p class="empty">No tracking projects found. Initialize an engine index above to start parsing records.</p>
   </div>
@@ -122,6 +147,16 @@
   var editingProjectId = document.getElementById('editingProjectId');
   var projSubmitBtn = document.getElementById('projSubmitBtn');
   var projCancelBtn = document.getElementById('projCancelBtn');
+  var projCategory = document.getElementById('projCategory');
+  var projWebsite = document.getElementById('projWebsite');
+
+  // Active dashboard tab (legacy projects w/o a category default to Enterprise)
+  var activeTab = 'Enterprise';
+  var CATEGORIES = ['Enterprise', 'Personal'];
+
+  function projectCategory(project) {
+    return (project.category === 'Personal') ? 'Personal' : 'Enterprise';
+  }
 
   // Platform breakdown options with their display icons
   var PLATFORM_META = {
@@ -152,6 +187,8 @@
     editingProjectId.value = '';
     document.getElementById('projName').value = '';
     document.getElementById('endGoal').value = '';
+    projCategory.value = 'Enterprise';
+    projWebsite.value = '';
     document.querySelectorAll('.plat-cb').forEach(function (cb) { cb.checked = false; });
     projSubmitBtn.textContent = 'Initialize Project';
     projCancelBtn.style.display = 'none';
@@ -194,6 +231,7 @@
   }
 
   function render() {
+    // Logging dropdown always lists every project (independent of the active tab).
     projSelect.innerHTML = '';
     db.projects.forEach(function (p) {
       var opt = document.createElement('option');
@@ -202,13 +240,24 @@
       projSelect.appendChild(opt);
     });
 
-    if (db.projects.length === 0) {
-      dashboard.innerHTML = '<p class="empty">No tracking projects found. Initialize an engine index above to start parsing records.</p>';
+    // Update tab counts and active tab styling.
+    CATEGORIES.forEach(function (cat) {
+      var countEl = document.getElementById('count-' + cat);
+      if (countEl) countEl.textContent = db.projects.filter(function (p) { return projectCategory(p) === cat; }).length;
+      var tabBtn = document.querySelector('.tab[data-tab="' + cat + '"]');
+      if (tabBtn) tabBtn.classList.toggle('active', activeTab === cat);
+    });
+
+    // Filter the dashboard cards by the currently selected tab.
+    var visible = db.projects.filter(function (p) { return projectCategory(p) === activeTab; });
+
+    if (visible.length === 0) {
+      dashboard.innerHTML = '<p class="empty">No ' + escapeHtml(activeTab) + ' projects found. Initialize a project above (or switch tabs) to start parsing records.</p>';
       return;
     }
 
     var html = '';
-    db.projects.forEach(function (project) {
+    visible.forEach(function (project) {
       var projectLogs = db.logs.filter(function (l) { return l.projectId === project.id; });
       var totalHours = projectLogs.reduce(function (sum, cur) { return sum + parseFloat(cur.timeSpent || 0); }, 0);
 
@@ -219,6 +268,7 @@
               escapeHtml(project.endGoal || 'None Specified') +
               '<span style="margin:0 10px;color:#ccc">|</span>' +
               '<strong>⏳ Accrued Overhead:</strong> ' + totalHours.toFixed(2) + ' Hours Total</p>';
+      html += '<p class="proj-website"><strong>🔗 Website:</strong> ' + buildWebsiteLink(project.website) + '</p>';
       html += '<div style="margin:0 0 1rem;"><strong style="font-size:0.85rem;">🖱️ Platforms:</strong> ' +
               buildPlatformBadges(project.platforms) + '</div>';
 
@@ -243,6 +293,15 @@
     dashboard.innerHTML = html;
   }
 
+  // Renders the project website link, or an "add a link" hint when empty.
+  function buildWebsiteLink(website) {
+    var url = String(website || '').trim();
+    if (!url) return '<span class="no-website">No link set — add one via ✏️ Edit.</span>';
+    var safe = escapeHtml(url);
+    var display = safe.replace(/^https?:\/\//i, '');
+    return '<a href="' + safe + '" target="_blank" rel="noopener noreferrer">' + display + '</a>';
+  }
+
   // Create or update a project profile
   formProject.addEventListener('submit', function (e) {
     e.preventDefault();
@@ -253,7 +312,13 @@
 
     var editId = editingProjectId.value;
     var route = editId ? 'project_update' : 'project';
-    var payload = { name: name, endGoal: goal, platforms: platforms };
+    var payload = {
+      name: name,
+      endGoal: goal,
+      category: projCategory.value,
+      website: projWebsite.value.trim(),
+      platforms: platforms
+    };
     if (editId) payload.id = editId;
 
     fetch(API_BASE + '?route=' + route, {
@@ -284,10 +349,20 @@
     editingProjectId.value = project.id;
     document.getElementById('projName').value = project.name;
     document.getElementById('endGoal').value = project.endGoal || '';
+    projCategory.value = projectCategory(project);
+    projWebsite.value = project.website || '';
     setPlatformCheckboxes(project.platforms);
     projSubmitBtn.textContent = 'Save Project Changes';
     projCancelBtn.style.display = 'inline-block';
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Tab switching (Enterprise / Personal)
+  document.querySelectorAll('.tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      activeTab = tab.dataset.tab;
+      render();
+    });
   });
 
   // Log daily progress
