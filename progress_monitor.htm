@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>⚡ In-Memory Daily Project Progress Matrix | AniShiv</title>
+<title>MesonX Pulse | AniShiv</title>
 <meta name="description" content="AniShiv Progress Monitor dashboard - track daily project tasks, accomplishments, accrued time overhead, and strategic end goals." />
 <style>
   /* Apple-inspired design system */
@@ -241,6 +241,43 @@
   .s-panel { display: none; }
   .s-panel.active { display: block; }
 
+  /* Data visualization cards & animated charts */
+  .chart-card {
+    background: var(--card);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 22px;
+    padding: 1.25rem 1.5rem 1rem;
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.08);
+    margin: 1.25rem 0 1.25rem;
+  }
+  .chart-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 0.75rem; }
+  .chart-title { font-weight: 650; font-size: 1.05rem; }
+  .chart-sub { color: var(--sub); font-size: 0.8rem; }
+  .chart-body { overflow-x: auto; }
+  .byDate-svg { width: 100%; height: 150px; display: block; }
+  .trend-wrap { margin: 1rem 0 1.25rem; }
+  .trend-svg { width: 100%; height: 130px; display: block; }
+
+  /* Line draw animation */
+  .trend-line {
+    fill: none; stroke: var(--blue); stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+    transition: stroke-dashoffset 1.5s ease;
+  }
+  .trend-line.dim { stroke: #c9c9d2; }
+  .trend-area { fill: rgba(0, 113, 227, 0.13); transition: opacity 1.2s ease; opacity: 0; }
+  .trend-area.show, .trend-area.animate { opacity: 1; }
+
+  /* Bars grow in (projects by date) */
+  .bar-col { transform-box: fill-box; transform-origin: center bottom; animation: growBar 0.7s ease forwards; }
+  @keyframes growBar { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+  .trend-dot { fill: var(--blue); transition: transform 0.2s ease; }
+  .trend-dot:hover { transform: scale(1.6); transform-box: fill-box; transform-origin: center; }
+  .chart-axis { fill: var(--sub); font-size: 9px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin-top: 0.5rem; font-size: 0.78rem; color: #515154; }
+  .legend b { color: var(--ink); }
+
   @media (max-width: 720px) {
     .sidebar { width: 100%; min-width: 0; border-radius: 0; }
     h1 { font-size: 1.85rem; }
@@ -250,11 +287,19 @@
 <body>
 <div class="wrap content" id="content">
   <a class="back" href="/">&larr; Back to AniShiv World</a>
-  <h1>⚡ In-Memory Daily Project Progress Matrix</h1>
+  <h1>⚡ MesonX Pulse</h1>
   <div id="msg" class="msg"></div>
 
   <!-- Main content: Live Operational Dashboard -->
-  <h2>📊 Live Operational Dashboard Matrix</h2>
+  <h2>📡 Streaming Status</h2>
+  <!-- Projects by date: aggregate workload chart shown above the tabs -->
+  <div class="chart-card" id="byDateCard">
+    <div class="chart-head">
+      <span class="chart-title">📅 Projects by Date</span>
+      <span class="chart-sub" id="byDateRange"></span>
+    </div>
+    <div class="chart-body" id="byDateChart"></div>
+  </div>
   <div class="tabs">
     <button type="button" class="tab active" data-tab="Enterprise">🏢 Enterprise<span class="count" id="count-Enterprise">0</span></button>
     <button type="button" class="tab" data-tab="Personal">🏠 Personal<span class="count" id="count-Personal">0</span></button>
@@ -396,6 +441,10 @@
   var activeTab = 'Enterprise';
   var CATEGORIES = ['Enterprise', 'Personal'];
 
+  // Visualization window for the trending graphs
+  var TREND_START = '2026-01-01';
+  var TREND_END = new Date().toISOString().split('T')[0];
+
   function projectCategory(project) {
     return (project.category === 'Personal') ? 'Personal' : 'Enterprise';
   }
@@ -472,6 +521,173 @@
     }).join('');
   }
 
+  // ------------------------------------------------------------------
+  // Data visualization helpers (animated SVG charts)
+  // ------------------------------------------------------------------
+  function allDatesBetween(start, end) {
+    var out = [];
+    var cur = new Date(start + 'T00:00:00');
+    var last = new Date(end + 'T00:00:00');
+    while (cur <= last) {
+      out.push(cur.toISOString().split('T')[0]);
+      cur.setDate(cur.getDate() + 1);
+    }
+    return out;
+  }
+  function shortDate(dateStr) {
+    var d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
+  // Build a daily-series array of {date, y} from a map of date -> hours
+  function dailySeries(buckets, start, end) {
+    return allDatesBetween(start, end).map(function (d) {
+      return { date: d, y: (buckets[d] || 0) };
+    });
+  }
+  // Build an SVG polyline path from points within [min,max] scaled to a box
+  function linePath(points, w, h, minY, maxY, pad) {
+    var range = (maxY - minY) || 1;
+    var innerW = w - pad * 2;
+    var innerH = h - pad * 2;
+    return points.map(function (p, i) {
+      var x = pad + (points.length <= 1 ? innerW / 2 : (i / (points.length - 1)) * innerW);
+      var y = pad + innerH - ((p.y - minY) / range) * innerH;
+      return (i === 0 ? 'M' : 'L') + x.toFixed(1) + ' ' + y.toFixed(1);
+    }).join(' ');
+  }
+  function polyAreaPath(line) {
+    var pts = line.trim().replace(/^M/, '').split(/[L]/).map(function (s) {
+      return s.trim();
+    }).filter(Boolean);
+    var last = pts[pts.length - 1];
+    var first = pts[0];
+    return line + ' L' + last + ' L' + first.split(' ')[0] + ' 0 L' + first.split(' ')[0] + ' ' + first.split(' ')[1] + ' Z';
+  }
+
+  // CSS-driven animation: draw the line, fade in the area, stagger bars/dots
+  function animateChart(svg) {
+    var line = svg.querySelector('path.trend-line');
+    if (line) {
+      var len = line.getTotalLength();
+      line.style.strokeDasharray = len;
+      line.style.strokeDashoffset = len;
+      requestAnimationFrame(function () { line.style.strokeDashoffset = '0'; });
+    }
+    var area = svg.querySelector('path.trend-area');
+    if (area) requestAnimationFrame(function () { area.classList.add('animate'); });
+  }
+
+  // Renders an animated area/line trend chart into an element.
+  function renderTrend(parentEl, series, opts) {
+    opts = opts || {};
+    var w = (opts.width || 600) - (opts.padX || 0);
+    var h = opts.height || 130;
+    var padX = opts.padX || 8;
+    var padTop = opts.padTop || 14;
+    var padBottom = opts.padBottom || 20;
+    var innerW = w - padX * 2;
+    var innerH = h - padTop - padBottom;
+    var maxY = opts.maxY != null ? opts.maxY : Math.max(1, Math.max.apply(null, series.map(function (p) { return p.y; })));
+    var n = series.length;
+    var yTicks = opts.yTicks == null ? 3 : opts.yTicks;
+
+    var px = function (i) { return n <= 1 ? padX + innerW / 2 : padX + (i / (n - 1)) * innerW; };
+    var py = function (y) { return padTop + innerH - (y / maxY) * innerH; };
+
+    var line = linePath(series, w, h, 0, maxY, Math.min(padTop, padX));
+    var area = polyAreaPath(line);
+
+    var svg = '<svg class="trend-svg" viewBox="0 0 ' + w + ' ' + h + '">';
+    svg += '<path class="trend-area" d="' + area + '"></path>';
+    svg += '<path class="trend-line" d="' + line + '"></path>';
+    // grid + y axis ticks
+    for (var t = 0; t <= yTicks; t++) {
+      var yv = (maxY * t) / yTicks;
+      var yy = py(yv);
+      svg += '<line x1="' + padX + '" y1="' + yy + '" x2="' + (w - padX) + '" y2="' + yy + '" stroke="#ececf1" stroke-width="1"></line>';
+      svg += '<text class="chart-axis" x="' + (padX - 4) + '" y="' + (yy + 3) + '" text-anchor="end">' + (t === 0 ? '' : yv.toFixed(yv % 1 ? 1 : 0)) + '</text>';
+    }
+    // x-axis labels (first, middle, last)
+    [
+      { i: 0, anchor: 'start' },
+      { i: Math.floor(n / 2), anchor: 'middle' },
+      { i: n - 1, anchor: 'end' }
+    ].forEach(function (el) {
+      var x = px(el.i);
+      svg += '<text class="chart-axis" x="' + x + '" y="' + (h - 4) + '" text-anchor="' + el.anchor + '">' + shortDate(series[el.i].date) + '</text>';
+    });
+    // dots (animate via CSS)
+    series.forEach(function (p, i) {
+      var x = px(i); var y = py(p.y);
+      svg += '<circle class="trend-dot" cx="' + x + '" cy="' + y + '" r="2.4" style="animation:growBar .4s ease ' + (i * 0.02) + 's both"></circle>';
+    });
+    svg += '</svg>';
+
+    parentEl.innerHTML = svg;
+    animateChart(parentEl.querySelector('svg'));
+    return maxY;
+  }
+
+  // Aggregate every project's daily hours across the window (sum per date)
+  function computeByDate() {
+    var buckets = {};
+    var projectBuckets = {};
+    db.logs.forEach(function (log) {
+      var h = parseFloat(log.timeSpent || 0);
+      if (!h || log.date < TREND_START) return;
+      buckets[log.date] = (buckets[log.date] || 0) + h;
+      projectBuckets[log.projectId] = projectBuckets[log.projectId] || {};
+      projectBuckets[log.projectId][log.date] = (projectBuckets[log.projectId][log.date] || 0) + h;
+    });
+    // total per project over window
+    var projectTotals = {};
+    Object.keys(projectBuckets).forEach(function (pid) {
+      var sum = Object.keys(projectBuckets[pid]).reduce(function (a, d) { return a + projectBuckets[pid][d]; }, 0);
+      projectTotals[pid] = sum;
+    });
+    return { byDate: buckets, perProject: projectBuckets, projectTotals: projectTotals };
+  }
+
+  // Renders the "Projects by Date" aggregate chart above the tabs.
+  function renderByDateChart() {
+    var el = document.getElementById('byDateChart');
+    var rangeEl = document.getElementById('byDateRange');
+    if (!el) return;
+    var agg = computeByDate();
+    var series = dailySeries(agg.byDate, TREND_START, TREND_END);
+    var total = series.reduce(function (a, p) { return a + p.y; }, 0);
+    rangeEl.textContent = shortDate(TREND_START) + ' – ' + shortDate(TREND_END) +
+      ' · Total ' + total.toFixed(1) + ' hrs across ' + Object.keys(agg.projectTotals).length + ' projects';
+    renderTrend(el, series, { width: 720, height: 150 });
+    var top = Object.keys(agg.projectTotals)
+      .map(function (pid) {
+        var p = db.projects.filter(function (x) { return x.id === pid; })[0];
+        return { name: p ? p.name : pid, hours: agg.projectTotals[pid] };
+      })
+      .sort(function (a, b) { return b.hours - a.hours; })
+      .slice(0, 6);
+    var legend = '<div class="legend">' + top.map(function (pr) {
+      return '<span><b>' + escapeHtml(pr.name) + '</b> · ' + pr.hours.toFixed(1) + ' hrs</span>';
+    }).join('') + '</div>';
+    el.insertAdjacentHTML('beforeend', legend);
+  }
+
+  // Renders an animated cumulative trending graph for one project.
+  function renderProjectTrend(el, projectId) {
+    if (!el) return;
+    var agg = computeByDate();
+    var buckets = agg.perProject[projectId] || {};
+    var daily = dailySeries(buckets, TREND_START, TREND_END);
+    var cum = 0;
+    var cumulative = daily.map(function (d) { cum += d.y; return { date: d.date, y: cum }; });
+    var total = cum;
+    renderTrend(el, cumulative, { width: 600, height: 130 });
+    var cap = document.createElement('div');
+    cap.className = 'legend';
+    cap.innerHTML = '<b>📈 Trending (cumulative)</b> — <b>' + total.toFixed(1) + ' hrs</b> total since ' + shortDate(TREND_START);
+    el.parentNode.appendChild(cap);
+  }
+
   function render() {
     // Logging dropdown always lists every project (independent of the active tab).
     projSelect.innerHTML = '';
@@ -493,6 +709,9 @@
     // Filter the dashboard cards by the currently selected tab.
     var visible = db.projects.filter(function (p) { return projectCategory(p) === activeTab; });
 
+    // Refresh the "Projects by Date" aggregate chart (all projects, regardless of tab).
+    renderByDateChart();
+
     if (visible.length === 0) {
       dashboard.innerHTML = '<p class="empty">No ' + escapeHtml(activeTab) + ' projects found. Initialize a project above (or switch tabs) to start parsing records.</p>';
       return;
@@ -513,6 +732,7 @@
       html += '<p class="proj-website"><strong>🔗 Website:</strong> ' + buildWebsiteLink(project.website) + '</p>';
       html += '<div style="margin:0 0 1rem;"><strong style="font-size:0.85rem;">🖱️ Platforms:</strong> ' +
               buildPlatformBadges(project.platforms) + '</div>';
+      html += '<div class="trend-wrap" id="trend-' + escapeHtml(project.id) + '"></div>';
 
       if (projectLogs.length === 0) {
         html += '<p class="empty" style="margin-left:0.5rem;">No logs registered to this project profile yet.</p>';
@@ -533,6 +753,10 @@
       html += '</div>';
     });
     dashboard.innerHTML = html;
+    // Render + animate each visible project's trending graph.
+    visible.forEach(function (project) {
+      renderProjectTrend(document.getElementById('trend-' + project.id), project.id);
+    });
   }
 
   // Renders the project website link, or an "add a link" hint when empty.
