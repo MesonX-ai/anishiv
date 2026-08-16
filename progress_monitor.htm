@@ -272,9 +272,49 @@
     .sidebar { width: 100%; min-width: 0; border-radius: 0; }
     h1 { font-size: 1.85rem; }
   }
+
+  /* Cool parallax background (MesonX Pulse) */
+  body { overflow-x: hidden; }
+  .wrap { position: relative; z-index: 1; }
+  .parallax-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .parallax-blob {
+    position: absolute;
+    will-change: transform;
+  }
+  .parallax-blob .blob-inner {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 32% 30%, var(--c, #48cae4), transparent 70%);
+    filter: blur(48px);
+    opacity: 0.55;
+    animation: blobFloat 16s ease-in-out infinite;
+  }
+  .parallax-blob:nth-child(2) .blob-inner { animation-duration: 19s; animation-delay: -4s; }
+  .parallax-blob:nth-child(3) .blob-inner { animation-duration: 22s; animation-delay: -8s; }
+  .parallax-blob:nth-child(4) .blob-inner { animation-duration: 18s; animation-delay: -2s; }
+  .parallax-blob:nth-child(5) .blob-inner { animation-duration: 24s; animation-delay: -6s; }
+  @keyframes blobFloat {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(26px, -34px, 0) scale(1.1); }
+  }
 </style>
 </head>
 <body>
+<div class="parallax-bg" id="parallaxBg" aria-hidden="true">
+  <div class="parallax-blob" data-depth="0.25" style="--c:#48cae4; top:-8%; left:-6%; width:360px; height:360px;"><span class="blob-inner"></span></div>
+  <div class="parallax-blob" data-depth="0.18" style="--c:#0071e3; top:-12%; right:-8%; width:420px; height:420px;"><span class="blob-inner"></span></div>
+  <div class="parallax-blob" data-depth="0.32" style="--c:#7209b7; bottom:-14%; left:-10%; width:440px; height:440px;"><span class="blob-inner"></span></div>
+  <div class="parallax-blob" data-depth="0.22" style="--c:#00a278; bottom:-10%; right:-6%; width:380px; height:380px;"><span class="blob-inner"></span></div>
+  <div class="parallax-blob" data-depth="0.40" style="--c:#4cc9f0; top:38%; left:52%; width:460px; height:460px;"><span class="blob-inner"></span></div>
+</div>
 <div class="wrap content" id="content">
   <a class="back" href="/">&larr; Back to AniShiv World</a>
   <h1>⚡ MesonX Pulse</h1>
@@ -990,6 +1030,40 @@
 
   // Hydrate application configuration contexts from the remote PHP runtime memory engine
   refreshData();
+})();
+</script>
+
+<script>
+// Cool parallax controller for MesonX Pulse
+(function () {
+  var bg = document.getElementById('parallaxBg');
+  if (!bg) return;
+  var blobs = Array.prototype.slice.call(bg.querySelectorAll('.parallax-blob'));
+  var mx = 0, my = 0, sy = 0, ticking = false;
+
+  function render() {
+    ticking = false;
+    for (var i = 0; i < blobs.length; i++) {
+      var el = blobs[i];
+      var depth = parseFloat(el.getAttribute('data-depth')) || 0.15;
+      var scale = parseFloat(el.getAttribute('data-scale')) || 1;
+      var tx = (-mx * depth).toFixed(1);
+      var ty = (-my * depth - sy * depth * 0.5).toFixed(1);
+      el.style.transform = 'translate3d(' + tx + 'px,' + ty + 'px,0) scale(' + scale + ')';
+    }
+  }
+  function request() {
+    if (!ticking) { ticking = true; window.requestAnimationFrame(render); }
+  }
+  window.addEventListener('mousemove', function (e) {
+    mx = e.clientX - window.innerWidth / 2;
+    my = e.clientY - window.innerHeight / 2;
+    request();
+  }, { passive: true });
+  window.addEventListener('scroll', function () {
+    sy = window.pageYOffset || document.documentElement.scrollTop || 0;
+    request();
+  }, { passive: true });
 })();
 </script>
 
