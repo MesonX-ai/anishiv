@@ -206,26 +206,40 @@
   .sidebar-close { background: rgba(0, 0, 0, 0.08); color: #424245; padding: 0.42rem 0.75rem; font-size: 0.9rem; }
   .sidebar-close:hover { background: rgba(0, 0, 0, 0.13); opacity: 1; }
 
-  /* Floating "Open Forms" pill button */
-  .sidebar-toggle {
+  /* Vertical floating tab rail (top-right): Setup / Log Time */
+  .rail {
     position: fixed;
+    top: 1.1rem;
     right: 1.1rem;
-    bottom: 1.1rem;
     z-index: 1001;
-    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+  .rail-tab {
+    background: rgba(255, 255, 255, 0.72);
     -webkit-backdrop-filter: blur(18px) saturate(180%);
     backdrop-filter: blur(18px) saturate(180%);
-    color: var(--blue);
+    color: var(--sub);
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 980px;
-    padding: 0.72rem 1.2rem;
-    font-size: 0.92rem;
+    padding: 0.58rem 1.1rem;
+    font-size: 0.85rem;
     font-weight: 600;
     line-height: 1;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     cursor: pointer;
+    text-align: center;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
   }
-  .sidebar-toggle:hover { background: rgba(255, 255, 255, 0.92); opacity: 1; }
+  .rail-tab:hover { background: rgba(255, 255, 255, 0.95); color: var(--ink); opacity: 1; }
+  .rail-tab:active { transform: scale(0.96); }
+  .rail-tab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .rail-tab.active:hover { background: var(--blue-active); color: #fff; }
+
+  /* Sidebar panels (only the active one is shown) */
+  .s-panel { display: none; }
+  .s-panel.active { display: block; }
 
   @media (max-width: 720px) {
     .sidebar { width: 100%; min-width: 0; border-radius: 0; }
@@ -250,8 +264,11 @@
   </div>
 </div>
 
-<!-- Floating sidebar: Setup/Edit + Log Daily Execution controls -->
-<button type="button" id="sidebarToggle" class="sidebar-toggle" title="Open project form controls">🧰 Open Forms</button>
+<!-- Vertical floating tab rail (top-right): opens each form panel in the sidebar -->
+<div class="rail">
+  <button type="button" id="tabSetup" class="rail-tab" data-panel="setup">⚙️ Setup</button>
+  <button type="button" id="tabLog" class="rail-tab" data-panel="log">⏱️ Log Time</button>
+</div>
 
 <div class="sidebar" id="progressSidebar" aria-hidden="true">
   <div class="sidebar-head">
@@ -260,7 +277,7 @@
   </div>
 
   <!-- Panel A: Engine Infrastructure Setup -->
-  <div class="panel">
+  <div class="panel s-panel active" id="panelSetup">
     <h2>➕ Setup / ✏️ Edit Project Profile</h2>
     <form id="form-project">
       <input type="hidden" id="editingProjectId" value="" />
@@ -298,7 +315,7 @@
   </div>
 
   <!-- Panel B: Production Status Management Log Entries -->
-  <div class="panel">
+  <div class="panel s-panel" id="panelLog">
     <h2>📝 Log Daily Execution Progress</h2>
     <form id="form-log">
       <label>Target Project Reference:</label>
@@ -343,8 +360,22 @@
   // Floating sidebar bindings
   var contentEl = document.getElementById('content');
   var sidebar = document.getElementById('progressSidebar');
-  var sidebarToggle = document.getElementById('sidebarToggle');
   var sidebarClose = document.getElementById('sidebarClose');
+  var panelMap = {
+    'setup': { tab: document.getElementById('tabSetup'), panel: document.getElementById('panelSetup') },
+    'log':   { tab: document.getElementById('tabLog'),   panel: document.getElementById('panelLog') }
+  };
+  var activePanel = 'setup';
+
+  function showPanel(name) {
+    activePanel = name;
+    Object.keys(panelMap).forEach(function (key) {
+      var entry = panelMap[key];
+      entry.tab.classList.toggle('active', key === name);
+      entry.panel.classList.toggle('active', key === name);
+    });
+    openSidebar();
+  }
 
   function openSidebar() {
     sidebar.classList.add('open');
@@ -356,6 +387,9 @@
     sidebar.classList.remove('open');
     contentEl.classList.remove('sidebar-open');
     sidebar.setAttribute('aria-hidden', 'true');
+    Object.keys(panelMap).forEach(function (key) {
+      panelMap[key].tab.classList.remove('active');
+    });
   }
 
   // Active dashboard tab (legacy projects w/o a category default to Enterprise)
@@ -548,8 +582,16 @@
     resetProjectForm();
   });
 
-  // Open / close the floating sidebar
-  sidebarToggle.addEventListener('click', openSidebar);
+  // Top-right vertical tabs: open their panel, or close when re-clicked
+  Object.keys(panelMap).forEach(function (key) {
+    panelMap[key].tab.addEventListener('click', function () {
+      if (activePanel === key && sidebar.classList.contains('open')) {
+        closeSidebar();
+      } else {
+        showPanel(key);
+      }
+    });
+  });
   sidebarClose.addEventListener('click', closeSidebar);
 
   // Edit button delegation (dashboard innerHTML is re-rendered, so listen on the container).
@@ -566,7 +608,7 @@
     setPlatformCheckboxes(project.platforms);
     projSubmitBtn.textContent = 'Save Project Changes';
     projCancelBtn.style.display = 'inline-block';
-    openSidebar();
+    showPanel('setup');
   });
 
   // Tab switching (Enterprise / Personal)
@@ -609,8 +651,8 @@
   // Initialize date to today
   document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
 
-  // Foundations: float the sidebar open on wide screens, closed (tucked) on small screens.
-  if (window.innerWidth >= 1100) { openSidebar(); } else { closeSidebar(); }
+  // Foundations: show the Setup panel on wide screens, keep the tabs only on small screens.
+  if (window.innerWidth >= 1100) { showPanel('setup'); } else { closeSidebar(); }
 
   // Hydrate application configuration contexts from the remote PHP runtime memory engine
   refreshData();
