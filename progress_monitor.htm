@@ -126,23 +126,6 @@
   .proj-website a:hover { text-decoration: underline; }
   .no-website { color: var(--sub); font-style: italic; }
 
-  /* Table (Apple-style, hairline separators) */
-  table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
-  th {
-    padding: 0.85rem 0.75rem;
-    border-bottom: 1px solid var(--hair);
-    color: var(--sub);
-    font-weight: 600;
-    font-size: 0.82rem;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-  }
-  td { padding: 0.95rem 0.75rem; border-bottom: 1px solid var(--row-line); vertical-align: top; }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover td { background: #fafafc; }
-  td.hours { color: var(--blue); font-weight: 700; }
-  td.date { font-weight: 600; color: #424245; white-space: nowrap; }
-
   /* Platform chips */
   .badge-plat {
     display: inline-block;
@@ -818,17 +801,6 @@
 
       if (projectLogs.length === 0) {
         html += '<p class="empty" style="margin-left:0.5rem;">No logs registered to this project profile yet.</p>';
-      } else {
-        html += '<div style="overflow-x:auto;"><table>';
-        html += '<thead><tr><th>Engine Tasks</th><th>Milestones &amp; Accomplishments</th></tr></thead>';
-        html += '<tbody>';
-        projectLogs.forEach(function (log) {
-          html += '<tr>';
-          html += '<td style="white-space:pre-wrap">' + escapeHtml(log.tasks) + '</td>';
-          html += '<td style="white-space:pre-wrap">' + escapeHtml(log.accomplishments) + '</td>';
-          html += '</tr>';
-        });
-        html += '</tbody></table></div>';
       }
       html += '</div>';
     });
