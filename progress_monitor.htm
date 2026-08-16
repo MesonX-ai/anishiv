@@ -305,6 +305,15 @@
     0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
     50% { transform: translate3d(26px, -34px, 0) scale(1.1); }
   }
+  .site-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--row-line);
+    text-align: center;
+    color: var(--sub);
+    font-size: 0.85rem;
+  }
+  .site-footer p { margin: 0; }
 </style>
 </head>
 <body>
@@ -337,6 +346,9 @@
   <div class="dash" id="dashboard">
     <p class="empty">No tracking projects found. Use the floating form controls to add a project profile.</p>
   </div>
+  <footer class="site-footer">
+    <p>Copyright &copy; <span id="footerYear">2026</span> Mesonsoft. All Rights Reserved.</p>
+  </footer>
 </div>
 
 <!-- Vertical floating tab rail (top-right): opens each form panel in the sidebar -->
@@ -1064,6 +1076,9 @@
     sy = window.pageYOffset || document.documentElement.scrollTop || 0;
     request();
   }, { passive: true });
+
+  var footerYear = document.getElementById('footerYear');
+  if (footerYear) footerYear.textContent = new Date().getFullYear();
 })();
 </script>
 
