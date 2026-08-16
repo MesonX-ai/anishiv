@@ -435,42 +435,13 @@
   var TREND_START = '2026-01-01';
   var TREND_END = new Date().toISOString().split('T')[0];
 
-  // Cool color palette for project trending visualizations
-  var COOL_PALETTE = [
-    '#0077b6', '#00b4d8', '#0096c7', '#48cae4', '#90e0ef',
-    '#023e8a', '#0071e3', '#00a278', '#64dfdf', '#48bfe3',
-    '#4361ee', '#4cc9f0', '#4895ef', '#5e60ce', '#6930c3',
-    '#7209b7', '#560bad', '#480ca8', '#7b2cbf', '#c77dff',
-    '#9d4edd', '#5a189a', '#00bbf9', '#4e79a7', '#59a14f',
-    '#76b7b2', '#0b84a5', '#6f4e7c', '#3a0ca3', '#3c1642'
-  ];
-  var assignedCoolColors = {};
-  function hashStr(s) {
-    var h = 0;
-    for (var i = 0; i < s.length; i++) {
-      h = ((h << 5) - h) + s.charCodeAt(i);
-      h |= 0;
-    }
-    return Math.abs(h);
-  }
+  // Stable per-project color palette (for the "Projects by Date" legend/chart)
+  var PROJECT_COLORS = ['#0b84a5', '#f6c85f', '#6f4e7c', '#ca6b09', '#00a278', '#d56f2a', '#4e79a7', '#e15759', '#b07aa1', '#59a14f', '#f28e2b', '#76b7b2'];
   function projectColor(projectId) {
-    if (assignedCoolColors[projectId]) return assignedCoolColors[projectId];
-    var hash = hashStr(projectId);
-    var color = COOL_PALETTE[hash % COOL_PALETTE.length];
-    var attempts = 0;
-    var isAssigned = function(c) {
-      for (var k in assignedCoolColors) {
-        if (assignedCoolColors[k] === c) return true;
-      }
-      return false;
-    };
-    while (isAssigned(color) && attempts < COOL_PALETTE.length) {
-      hash = (hash * 31 + 17) % 1000;
-      color = COOL_PALETTE[hash % COOL_PALETTE.length];
-      attempts++;
+    for (var i = 0; i < db.projects.length; i++) {
+      if (db.projects[i].id === projectId) return PROJECT_COLORS[i % PROJECT_COLORS.length];
     }
-    assignedCoolColors[projectId] = color;
-    return color;
+    return '#666';
   }
 
   function projectCategory(project) {
@@ -625,11 +596,9 @@
     var line = linePath(series, w, h, 0, maxY, Math.min(padTop, padX));
     var area = polyAreaPath(line);
 
-    var colorStyle = opts.color ? ' style="stroke:' + opts.color + '"' : '';
-    var areaStyle = opts.color ? ' style="fill:' + opts.color + ';fill-opacity:0.13"' : '';
     var svg = '<svg class="trend-svg" viewBox="0 0 ' + w + ' ' + h + '">';
-    svg += '<path class="trend-area" d="' + area + '"' + areaStyle + '></path>';
-    svg += '<path class="trend-line" d="' + line + '"' + colorStyle + '"></path>';
+    svg += '<path class="trend-area" d="' + area + '"></path>';
+    svg += '<path class="trend-line" d="' + line + '"></path>';
     // grid + y axis ticks
     for (var t = 0; t <= yTicks; t++) {
       var yv = (maxY * t) / yTicks;
@@ -637,17 +606,13 @@
       svg += '<line x1="' + padX + '" y1="' + yy + '" x2="' + (w - padX) + '" y2="' + yy + '" stroke="#ececf1" stroke-width="1"></line>';
       svg += '<text class="chart-axis" x="' + (padX - 4) + '" y="' + (yy + 3) + '" text-anchor="end">' + (t === 0 ? '' : yv.toFixed(yv % 1 ? 1 : 0)) + '</text>';
     }
-    // dots (animate via CSS)
-    series.forEach(function (p, i) {
-      var x = px(i); var y = py(p.y);
-      svg += '<circle class="trend-dot" cx="' + x + '" cy="' + y + '" r="2.4" style="animation:growBar .4s ease ' + (i * 0.02) + 's both' + (opts.color ? ';fill:' + opts.color : '') + '"></circle>';
-    });
-    svg += '</svg>';
-
-    parentEl.innerHTML = svg;
-    animateChart(parentEl.querySelector('svg'));
-    return maxY;
-  }
+    // x-axis labels (first, middle, last)
+    [
+      { i: 0, anchor: 'start' },
+      { i: Math.floor(n / 2), anchor: 'middle' },
+      { i: n - 1, anchor: 'end' }
+    ].forEach(function (el) {
+      var x = px(el.i);
       svg += '<text class="chart-axis" x="' + x + '" y="' + (h - 4) + '" text-anchor="' + el.anchor + '">' + shortDate(series[el.i].date) + '</text>';
     });
     // dots (animate via CSS)
@@ -722,8 +687,8 @@
     parentEl.innerHTML = svg;
   }
 
-  // Renders a per-project color-coded stacked area chart.
-  function renderStackedChart(parentEl, layers, dates, maxY) {
+  // Renders the "Projects by Date" chart: per-project colors + legend, projects worked since Jan 2026.
+  function renderByDateChart() {
     var el = document.getElementById('byDateChart');
     var rangeEl = document.getElementById('byDateRange');
     if (!el) return;
@@ -781,7 +746,7 @@
     var cum = 0;
     var cumulative = daily.map(function (d) { cum += d.y; return { date: d.date, y: cum }; });
     var total = cum;
-    renderTrend(el, cumulative, { width: 600, height: 130, color: projectColor(projectId) });
+    renderTrend(el, cumulative, { width: 600, height: 130 });
     var cap = document.createElement('div');
     cap.className = 'legend';
     cap.innerHTML = '<b>📈 Trending (cumulative)</b> — <b>' + total.toFixed(1) + ' hrs</b> total since ' + shortDate(TREND_START);
@@ -990,8 +955,8 @@
   // Initialize date to today
   document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
 
-  // Foundations: keep the sidebar closed by default on all screen sizes.
-  closeSidebar();
+  // Foundations: show the Setup panel on wide screens, keep the tabs only on small screens.
+  if (window.innerWidth >= 1100) { showPanel('setup'); } else { closeSidebar(); }
 
   // Hydrate application configuration contexts from the remote PHP runtime memory engine
   refreshData();
