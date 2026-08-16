@@ -340,6 +340,20 @@
     60%  { transform: scale(1); }
     100% { transform: scale(1); }
   }
+
+  /* Live streaming status with pulsing dot */
+  .live-status { display: inline-flex; align-items: center; gap: 0.55rem; }
+  .live-dot {
+    width: 11px; height: 11px; border-radius: 50%;
+    background: #2dd4bf;
+    box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.7);
+    animation: livePulse 1.6s cubic-bezier(0.66, 0, 0, 1) infinite;
+  }
+  @keyframes livePulse {
+    0%   { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.7); }
+    70%  { box-shadow: 0 0 0 14px rgba(45, 212, 191, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0); }
+  }
 </style>
 </head>
 <body>
@@ -356,7 +370,7 @@
   <div id="msg" class="msg"></div>
 
   <!-- Main content: Live Operational Dashboard -->
-  <h2>📡 Streaming Status</h2>
+  <h2 class="live-status"><span class="live-dot"></span> Live Status</h2>
   <!-- Projects by date: aggregate workload chart shown above the tabs -->
   <div class="chart-card" id="byDateCard">
     <div class="chart-head">
