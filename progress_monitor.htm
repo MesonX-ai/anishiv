@@ -343,6 +343,7 @@
 
   /* Live streaming status with pulsing dot */
   .live-status { display: inline-flex; align-items: center; gap: 0.55rem; }
+  .live-text { color: var(--sub); font-weight: 300; letter-spacing: 0.01em; }
   .live-dot {
     width: 11px; height: 11px; border-radius: 50%;
     background: #2dd4bf;
@@ -370,7 +371,7 @@
   <div id="msg" class="msg"></div>
 
   <!-- Main content: Live Operational Dashboard -->
-  <h2 class="live-status"><span class="live-dot"></span> Live Status</h2>
+  <h2 class="live-status"><span class="live-dot"></span> <span class="live-text">Live Status</span></h2>
   <!-- Projects by date: aggregate workload chart shown above the tabs -->
   <div class="chart-card" id="byDateCard">
     <div class="chart-head">
