@@ -2,6 +2,12 @@ User-agent: *
 Disallow: /.errordocs/
 Disallow: /cgi/
 Disallow: /cgi-bin/
+Disallow: /messages/
+Disallow: /contact_submit.php
+Disallow: /local_router.php
+Disallow: /progress_api.php
+Disallow: /progress_monitor.json
+Disallow: /projects_backup.json
 
 Allow: /css/
 Allow: /js/
