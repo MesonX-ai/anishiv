@@ -64,7 +64,7 @@ img { border: 0 none; }
 		/*width:1045px;
 		margin:0 auto;*/
 		background:url(../images/jf_bottom.png) no-repeat bottom center;
-		padding-bottom:465px;
+		padding-bottom:570px;
 }
 #jf-wrapper{
 	margin:0 auto;
@@ -467,7 +467,7 @@ background:url(../images/jf_div.png) repeat-x bottom left;
 	cursor:pointer;
 }
 
-#jf-footer{width:1000px;position:absolute;bottom:0px;height:465px;overflow:hidden;}
+#jf-footer{width:1000px;position:absolute;bottom:0px;height:570px;overflow:hidden;}
 #jf-bottom{margin-left:34px;width:952px;height:177px;background:url(../images/jf-bottom.png) no-repeat;padding-top:10px;}
 #jf-bottom h3{font-size:16px;padding-left:20px;}
 #jf-breadcrumbs{margin-top:5px;margin-bottom:15px;}
@@ -482,7 +482,9 @@ background:url(../images/jf_div.png) repeat-x bottom left;
 #jf-footermenu ul li{list-style:none;display:inline-block;}
 #jf-footermenu ul li a,#jf-footermenu ul li a:visited{display:block;margin-left:20px;font-weight:bold;color:#303030;text-decoration:none;font-size:11px}
 #jf-footermenu ul li a:hover,#jf-footermenu ul li#current a{text-decoration:none;color:#fc930a}
-#jf-joomfreak{text-align:center;margin-top:40px;}
+#jf-joomfreak{text-align:center;margin-top:40px;position:relative;z-index:20;clear:both;}
+#jf-joomfreak a{display:inline-block;}
+#jf-joomfreak img{width:150px;height:150px;max-width:100%;display:block;margin:0 auto;}
 #pathway {
 	padding: 0px 10px 8px;
 	width: auto;
