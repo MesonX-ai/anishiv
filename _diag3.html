@@ -1,0 +1,30 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>diag3</title></head><body>
+<pre id="out" style="white-space:pre-wrap;"></pre>
+<script>
+function probe(name, done){
+  var ifr=document.createElement('iframe');
+  ifr.src=name+'.htm'; ifr.style.width='1280px'; ifr.style.height='300px';
+  ifr.onload=function(){
+    try{
+      var d=ifr.contentDocument;
+      var b=getComputedStyle(d.body);
+      var o={page:name,
+        bgImage:b.backgroundImage.slice(0,80),
+        bgColor:b.backgroundColor,
+        bodyId:d.body.id
+      };
+      var imgs=d.querySelectorAll('img');
+      var broken=[];
+      imgs.forEach(function(im){ if(im.complete && im.naturalWidth===0 && im.src) broken.push(im.getAttribute('src')); });
+      o.brokenImages=broken;
+      done(o);
+    }catch(e){done({page:name,error:e.message})}
+  };
+  document.body.appendChild(ifr);
+}
+document.getElementById('out').textContent='loading';
+probe('index',function(a){ document.getElementById('out').textContent=JSON.stringify(a);
+  probe('shiva-dhanuskodi',function(b){ document.getElementById('out').textContent=JSON.stringify(a)+'\n'+JSON.stringify(b);
+    probe('contactus',function(c){ document.getElementById('out').textContent=JSON.stringify(a)+'\n'+JSON.stringify(b)+'\n'+JSON.stringify(c); }); }); });
+</script>
+</body></html>

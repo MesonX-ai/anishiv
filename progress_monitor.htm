@@ -6,19 +6,24 @@
 <title>MesonX Pulse | AniShiv</title>
 <meta name="description" content="AniShiv Progress Monitor dashboard - track daily project tasks, accomplishments, accrued time overhead, and strategic end goals." />
 <style>
-  /* Apple-inspired design system */
+  /* Apple-inspired design system — dark mode */
   :root {
-    --blue: #0071e3;
-    --blue-active: #0077ed;
-    --ink: #1d1d1f;
-    --sub: #6e6e73;
-    --hair: #d2d2d7;
-    --row-line: #e8e8ed;
-    --fill: #f5f5f7;
-    --card: #ffffff;
+    --blue: #0a84ff;
+    --blue-active: #409cff;
+    --ink: #f5f5f7;
+    --sub: #86868b;
+    --hair: #3a3a3c;
+    --row-line: #2c2c2e;
+    --fill: #000000;
+    --card: #1c1c1e;
+    color-scheme: dark;
   }
   * { box-sizing: border-box; }
-  ::selection { background: rgba(0, 113, 227, 0.22); }
+  ::selection { background: rgba(10, 132, 255, 0.35); }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #3a3a3c; border-radius: 8px; border: 2px solid #000; }
+  ::-webkit-scrollbar-thumb:hover { background: #48484a; }
   body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
@@ -38,13 +43,13 @@
   .panel {
     padding: 1.5rem;
     background: var(--card);
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.07);
     border-radius: 20px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.55);
     margin-bottom: 1.25rem;
   }
   .panel h2 { margin-top: 0; font-size: 1.15rem; }
-  label { display: block; margin-bottom: 0.4rem; font-size: 0.85rem; font-weight: 600; color: #424245; }
+  label { display: block; margin-bottom: 0.4rem; font-size: 0.85rem; font-weight: 600; color: #a1a1a6; }
   input, select, textarea {
     width: 100%;
     padding: 0.72rem 0.9rem;
@@ -60,7 +65,7 @@
   input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: var(--blue);
-    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.14);
+    box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.24);
   }
   button {
     padding: 0.62rem 1.15rem;
@@ -77,28 +82,28 @@
   button:active { transform: scale(0.97); }
   .btn-blue { background: var(--blue); }
   .btn-blue:hover { background: var(--blue-active); }
-  .btn-green { background: #16a34a; }
-  .btn-edit { background: #e8e8ed; color: #424245; padding: 0.32rem 0.8rem; font-size: 0.8rem; margin-left: 0.75rem; }
-  .btn-edit:hover { background: #dcdce1; opacity: 1; }
-  .btn-quick { background: rgba(0, 113, 227, 0.08); color: var(--blue); border: 1px solid rgba(0, 113, 227, 0.32); padding: 0.32rem 0.8rem; font-size: 0.8rem; margin-left: 0.5rem; border-radius: 980px; cursor: pointer; }
-  .btn-quick:hover { background: rgba(0, 113, 227, 0.16); }
-  .btn-cancel { background: #e8e8ed; color: #424245; padding: 0.32rem 0.8rem; font-size: 0.8rem; }
-  .btn-cancel:hover { background: #dcdce1; opacity: 1; }
+  .btn-green { background: #30d158; color: #00310e; }
+  .btn-edit { background: #2c2c2e; color: #d1d1d6; padding: 0.32rem 0.8rem; font-size: 0.8rem; margin-left: 0.75rem; }
+  .btn-edit:hover { background: #3a3a3c; opacity: 1; }
+  .btn-quick { background: rgba(10, 132, 255, 0.14); color: #64a8ff; border: 1px solid rgba(10, 132, 255, 0.45); padding: 0.32rem 0.8rem; font-size: 0.8rem; margin-left: 0.5rem; border-radius: 980px; cursor: pointer; }
+  .btn-quick:hover { background: rgba(10, 132, 255, 0.26); }
+  .btn-cancel { background: #2c2c2e; color: #d1d1d6; padding: 0.32rem 0.8rem; font-size: 0.8rem; }
+  .btn-cancel:hover { background: #3a3a3c; opacity: 1; }
 
   /* Dashboard card */
   .dash {
     background: var(--card);
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.07);
     border-radius: 22px;
     padding: 1.75rem;
-    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.55);
   }
   /* Segmented control tabs (iOS-style) */
   .tabs {
     display: inline-flex;
     gap: 2px;
     padding: 3px;
-    background: #e8e8ed;
+    background: #2c2c2e;
     border-radius: 980px;
     margin: 1.5rem 0 1.5rem;
   }
@@ -109,7 +114,7 @@
     border-radius: 980px;
     font-size: 0.9rem;
   }
-  .tab.active { background: var(--card); color: var(--ink); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14); }
+  .tab.active { background: #5a5a5e; color: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5); }
   .tab .count { opacity: 0.6; font-weight: 400; margin-left: 0.35rem; }
 
   /* Project cards */
@@ -117,10 +122,11 @@
   .goals {
     margin: 0 0 1rem;
     font-size: 0.95rem;
-    color: #515154;
-    background: #f2f2f7;
+    color: #d1d1d6;
+    background: #232326;
     padding: 0.85rem 1rem;
     border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
   }
   .empty { color: var(--sub); font-style: italic; }
   .proj-website { margin: 0 0 1rem; font-size: 0.9rem; }
@@ -131,20 +137,21 @@
   /* Platform chips */
   .badge-plat {
     display: inline-block;
-    background: #f2f2f7;
-    color: #3a3a3c;
+    background: #232326;
+    color: #d1d1d6;
     border-radius: 980px;
     padding: 0.22rem 0.7rem;
     margin: 0 0.3rem 0.3rem 0;
     font-size: 0.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.07);
   }
   .no-plat { color: var(--sub); font-size: 0.85rem; }
   .platform-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 1rem; }
   @media (max-width: 560px) { .platform-grid { grid-template-columns: repeat(2, 1fr); } }
   .platform-grid label {
     display: flex; align-items: center; gap: 0.45rem; margin: 0;
-    font-weight: 500; font-size: 0.88rem; color: #3a3a3c;
-    background: #fbfbfd; border: 1px solid var(--hair);
+    font-weight: 500; font-size: 0.88rem; color: #d1d1d6;
+    background: #232326; border: 1px solid var(--hair);
     padding: 0.5rem 0.65rem; border-radius: 12px; cursor: pointer;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
@@ -161,8 +168,8 @@
     font-weight: 500;
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
   }
-  .msg.ok { background: #e7f6ec; color: #0f6b34; display: block; }
-  .msg.err { background: #fdecec; color: #b00020; display: block; }
+  .msg.ok { background: rgba(48, 209, 88, 0.16); color: #30d158; display: block; border: 1px solid rgba(48, 209, 88, 0.35); }
+  .msg.err { background: rgba(255, 69, 58, 0.16); color: #ff453a; display: block; border: 1px solid rgba(255, 69, 58, 0.35); }
   /* Floating frosted-glass sidebar overlay (height matches the active form) */
   .sidebar {
     position: fixed;
@@ -172,13 +179,13 @@
     max-height: calc(100vh - 2.5rem);
     width: min(50vw, 620px);
     min-width: 340px;
-    background: rgba(245, 245, 247, 0.82);
+    background: rgba(28, 28, 30, 0.82);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
     backdrop-filter: blur(24px) saturate(180%);
-    border-left: 1px solid rgba(0, 0, 0, 0.08);
+    border-left: 1px solid rgba(255, 255, 255, 0.09);
     border-top-left-radius: 26px;
     border-bottom-left-radius: 26px;
-    box-shadow: -22px 0 60px rgba(0, 0, 0, 0.18);
+    box-shadow: -22px 0 60px rgba(0, 0, 0, 0.65);
     box-sizing: border-box;
     padding: 1.75rem 1.9rem 3rem;
     overflow-y: auto;
@@ -189,8 +196,8 @@
   .sidebar.open { transform: translateX(0); }
   .sidebar-head { display: flex; align-items: center; justify-content: space-between; margin: -0.25rem 0 1.1rem; }
   .sidebar-head h2 { margin: 0; font-size: 1.3rem; letter-spacing: -0.01em; }
-  .sidebar-close { background: rgba(0, 0, 0, 0.08); color: #424245; padding: 0.42rem 0.75rem; font-size: 0.9rem; }
-  .sidebar-close:hover { background: rgba(0, 0, 0, 0.13); opacity: 1; }
+  .sidebar-close { background: rgba(255, 255, 255, 0.1); color: #d1d1d6; padding: 0.42rem 0.75rem; font-size: 0.9rem; }
+  .sidebar-close:hover { background: rgba(255, 255, 255, 0.18); opacity: 1; }
 
   /* Vertical floating tab rail (top-right): Setup / Log Time */
   .rail {
@@ -203,22 +210,22 @@
     gap: 0.55rem;
   }
   .rail-tab {
-    background: rgba(255, 255, 255, 0.72);
+    background: rgba(44, 44, 46, 0.72);
     -webkit-backdrop-filter: blur(18px) saturate(180%);
     backdrop-filter: blur(18px) saturate(180%);
-    color: var(--sub);
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: #a1a1a6;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 980px;
     padding: 0.58rem 1.1rem;
     font-size: 0.85rem;
     font-weight: 600;
     line-height: 1;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
     cursor: pointer;
     text-align: center;
     transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
   }
-  .rail-tab:hover { background: rgba(255, 255, 255, 0.95); color: var(--ink); opacity: 1; }
+  .rail-tab:hover { background: rgba(58, 58, 60, 0.95); color: var(--ink); opacity: 1; }
   .rail-tab:active { transform: scale(0.96); }
   .rail-tab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
   .rail-tab.active:hover { background: var(--blue-active); color: #fff; }
@@ -230,7 +237,7 @@
   /* Data visualization cards & animated charts */
   .chart-card {
     background: var(--card);
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.07);
     border-radius: 22px;
     padding: 1.25rem 1.5rem 1rem;
     box-shadow: 0 10px 34px rgba(0, 0, 0, 0.08);
@@ -250,7 +257,7 @@
     stroke-linecap: round; stroke-linejoin: round;
     transition: stroke-dashoffset 1.5s ease;
   }
-  .trend-line.dim { stroke: #c9c9d2; }
+  .trend-line.dim { stroke: #55555c; }
   .trend-area { fill: rgba(0, 113, 227, 0.13); transition: opacity 1.2s ease; opacity: 0; }
   .trend-area.show, .trend-area.animate { opacity: 1; }
 
@@ -261,7 +268,7 @@
   .trend-dot { fill: var(--blue); transition: transform 0.2s ease; }
   .trend-dot:hover { transform: scale(1.6); transform-box: fill-box; transform-origin: center; }
   .chart-axis { fill: var(--sub); font-size: 9px; }
-  .legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin-top: 0.5rem; font-size: 0.78rem; color: #515154; }
+  .legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin-top: 0.5rem; font-size: 0.78rem; color: #a1a1a6; }
   .legend b { color: var(--ink); }
   .legend-item { display: inline-flex; align-items: center; gap: 0.4rem; }
   .legend-swatch { width: 10px; height: 10px; border-radius: 3px; flex: 0 0 auto; }
@@ -294,7 +301,7 @@
     border-radius: 50%;
     background: radial-gradient(circle at 32% 30%, var(--c, #48cae4), transparent 70%);
     filter: blur(48px);
-    opacity: 0.55;
+    opacity: 0.38;
     animation: blobFloat 16s ease-in-out infinite;
   }
   .parallax-blob:nth-child(2) .blob-inner { animation-duration: 19s; animation-delay: -4s; }
@@ -318,7 +325,7 @@
   /* Brand heading: chrome "MesonX" + pulsing "Pulse" */
   .h-brand { letter-spacing: -0.02em; }
   .brand-metal {
-    background: linear-gradient(180deg, #f2f5f8 0%, #aab4c0 16%, #3a414b 38%, #5b646f 50%, #23282f 58%, #707a86 80%, #d6dde4 100%);
+    background: linear-gradient(180deg, #fdfdff 0%, #c8d0da 16%, #6b7480 38%, #98a2ad 50%, #4a525c 58%, #aeb8c3 80%, #f0f4f8 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -531,11 +538,11 @@
   // Cool color palette for project trending visualizations (unique per project)
   var COOL_PALETTE = [
     '#0077b6', '#00b4d8', '#0096c7', '#48cae4', '#90e0ef',
-    '#023e8a', '#0071e3', '#00a278', '#64dfdf', '#48bfe3',
+    '#4d7cff', '#0071e3', '#00a278', '#64dfdf', '#48bfe3',
     '#4361ee', '#4cc9f0', '#4895ef', '#5e60ce', '#6930c3',
     '#7209b7', '#560bad', '#480ca8', '#7b2cbf', '#c77dff',
-    '#9d4edd', '#5a189a', '#00bbf9', '#4e79a7', '#59a14f',
-    '#76b7b2', '#0b84a5', '#6f4e7c', '#3a0ca3', '#3c1642'
+    '#9d4edd', '#c084fc', '#00bbf9', '#60a5fa', '#4ade80',
+    '#5eead4', '#22d3ee', '#e0aaff', '#7c5cff', '#d946ef'
   ];
   var assignedCoolColors = {};
   function hashStr(s) {
@@ -725,7 +732,7 @@
     for (var t = 0; t <= yTicks; t++) {
       var yv = (maxY * t) / yTicks;
       var yy = py(yv);
-      svg += '<line x1="' + padX + '" y1="' + yy + '" x2="' + (w - padX) + '" y2="' + yy + '" stroke="#ececf1" stroke-width="1"></line>';
+      svg += '<line x1="' + padX + '" y1="' + yy + '" x2="' + (w - padX) + '" y2="' + yy + '" stroke="#2c2c30" stroke-width="1"></line>';
       svg += '<text class="chart-axis" x="' + (padX - 4) + '" y="' + (yy + 3) + '" text-anchor="end">' + (t === 0 ? '' : yv.toFixed(yv % 1 ? 1 : 0)) + '</text>';
     }
     // x-axis labels (first, middle, last)
@@ -793,7 +800,7 @@
     for (var t = 0; t <= yTicks; t++) {
       var yv = (maxY * t) / yTicks;
       var yy = py(yv);
-      svg += '<line x1="' + padX + '" y1="' + yy + '" x2="' + (w - padX) + '" y2="' + yy + '" stroke="#ececf1" stroke-width="1"></line>';
+      svg += '<line x1="' + padX + '" y1="' + yy + '" x2="' + (w - padX) + '" y2="' + yy + '" stroke="#2c2c30" stroke-width="1"></line>';
       svg += '<text class="chart-axis" x="' + (padX - 4) + '" y="' + (yy + 3) + '" text-anchor="end">' + (t === 0 ? '' : yv.toFixed(yv % 1 ? 1 : 0)) + '</text>';
     }
     [{ i: 0, a: 'start' }, { i: Math.floor(dates.length / 2), a: 'middle' }, { i: dates.length - 1, a: 'end' }].forEach(function (en) {
@@ -912,14 +919,14 @@
       var totalHours = projectLogs.reduce(function (sum, cur) { return sum + parseFloat(cur.timeSpent || 0); }, 0);
       var pc = projectColor(project.id);
 
-      html += '<div style="margin:0 0 2.5rem;padding:0 0 1.5rem 1rem;border-left:4px solid ' + pc + ';border-bottom:1px solid #eee;">';
+      html += '<div style="margin:0 0 2.5rem;padding:0 0 1.5rem 1rem;border-left:4px solid ' + pc + ';border-bottom:1px solid rgba(255,255,255,0.09);">';
       html += '<h3 class="proj-h3" style="color:' + pc + '">📁 ' + escapeHtml(project.name) +
               '<button type="button" class="btn-edit" data-edit="' + escapeHtml(project.id) + '">✏️ Edit</button>' +
               '<button type="button" class="btn-quick" data-quick="0.5" data-quick-proj="' + escapeHtml(project.id) + '">+30m</button>' +
               '<button type="button" class="btn-quick" data-quick="1" data-quick-proj="' + escapeHtml(project.id) + '">+60m</button></h3>';
       html += '<p class="goals" style="margin-bottom:0.5rem;"><strong>🎯 Core End Goal Target:</strong> ' +
               escapeHtml(project.endGoal || 'None Specified') +
-              '<span style="margin:0 10px;color:#ccc">|</span>' +
+              '<span style="margin:0 10px;color:#55555c">|</span>' +
               '<strong>⏳ Accrued Overhead:</strong> ' + totalHours.toFixed(2) + ' Hours since Jan 2026</p>';
       html += '<p class="proj-website"><strong>🔗 Website:</strong> ' + buildWebsiteLink(project.website) + '</p>';
       html += '<div style="margin:0 0 1rem;"><strong style="font-size:0.85rem;">🖱️ Platforms:</strong> ' +

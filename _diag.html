@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>diag</title></head>
+<body>
+<pre id="out" style="white-space:pre-wrap;"></pre>
+<script>
+function readFrame(name, done){
+  var ifr = document.createElement('iframe');
+  ifr.src = name + '.htm';
+  ifr.style.width = '1280px';
+  ifr.style.height = '6000px';
+  ifr.onload = function(){
+    try{
+      var d = ifr.contentDocument;
+      var ids = ['jf-topleft','jf-topright','jf-header','jf-logo','jf-mainmenu','jf-footer-nav','jf-footermodule','jf-joomfreak'];
+      var res = {page: name, bodyH: d.body.scrollHeight, results: {}};
+      ids.forEach(function(id){
+        var el = d.getElementById(id);
+        if(!el){ res.results[id] = 'MISSING'; return; }
+        var r = el.getBoundingClientRect();
+        var cs = getComputedStyle(el);
+        var out = {
+          top: Math.round(r.top), bottom: Math.round(r.bottom), height: Math.round(r.height),
+          display: cs.display, bg: (cs.backgroundImage||'').slice(0,55)
+        };
+        var img = d.querySelector('#' + id + ' img');
+        if(img){
+          var ir = img.getBoundingClientRect();
+          out.img = {w: Math.round(ir.width), h: Math.round(ir.height)};
+        }
+        res.results[id] = out;
+      });
+      done(res);
+    }catch(e){ done({page:name, error:e.message}); }
+  };
+  document.body.appendChild(ifr);
+}
+document.getElementById('out').textContent = 'loading...';
+readFrame('index', function(r){
+  readFrame('shiva-dhanuskodi', function(r2){
+    readFrame('contactus', function(r3){
+      document.getElementById('out').textContent =
+        JSON.stringify(r) + '\n' + JSON.stringify(r2) + '\n' + JSON.stringify(r3);
+    });
+  });
+});
+</script>
+</body></html>
