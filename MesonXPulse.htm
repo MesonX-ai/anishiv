@@ -1298,7 +1298,7 @@
   }
 
   function refreshData(cb) {
-    fetch(API_BASE + '?route=list')
+    fetch(API_BASE + '?route=data')
       .then(function (r) { return r.json(); })
       .then(function (data) {
         db = data;
