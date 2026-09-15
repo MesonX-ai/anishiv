@@ -451,19 +451,19 @@
       <h4 style="margin:0 0 0.8rem; font-size:0.95rem; color:var(--ink);">📊 By Account:</h4>
       <div id="costAccounts" style="display:grid; gap:0.6rem;">
         <div class="cost-account">
-          <div class="cost-account-name">🏢 myfamilyassistant.ai (Account 123456789)</div>
-          <div class="cost-account-amount">$45.32</div>
-          <div style="font-size:0.75rem; color:var(--sub); margin-top:0.3rem;">Lambda: $12.50 | RDS: $22.10 | API Gateway: $5.20 | Other: $5.52</div>
+          <div class="cost-account-name">👨‍👩‍👧‍👦 myfamilyassistant.ai (Account 873363353263)</div>
+          <div class="cost-account-amount">$0.00</div>
+          <div style="font-size:0.75rem; color:var(--sub); margin-top:0.3rem;">Lambda: $0.00 | RDS: $0.00 | API Gateway: $0.00 | Other: $0.00</div>
         </div>
         <div class="cost-account">
-          <div class="cost-account-name">🎮 sQuark.ai (Account 987654321)</div>
-          <div class="cost-account-amount">$28.75</div>
-          <div style="font-size:0.75rem; color:var(--sub); margin-top:0.3rem;">API Gateway: $18.30 | Lambda: $6.80 | Data Transfer: $3.65</div>
+          <div class="cost-account-name">🎮 sQuark.ai (Account 6574-7346-4918)</div>
+          <div class="cost-account-amount">$0.00</div>
+          <div style="font-size:0.75rem; color:var(--sub); margin-top:0.3rem;">API Gateway: $0.00 | Lambda: $0.00 | Data Transfer: $0.00</div>
         </div>
         <div class="cost-account">
-          <div class="cost-account-name">🏪 mesonsoft.com (Account 555555555)</div>
-          <div class="cost-account-amount">$15.20</div>
-          <div style="font-size:0.75rem; color:var(--sub); margin-top:0.3rem;">CloudFront: $8.50 | S3: $4.20 | Route 53: $2.50</div>
+          <div class="cost-account-name">🏪 mesonsoft.com (Account 9046-0039-3479)</div>
+          <div class="cost-account-amount">$0.00</div>
+          <div style="font-size:0.75rem; color:var(--sub); margin-top:0.3rem;">CloudFront: $0.00 | S3: $0.00 | Route 53: $0.00</div>
         </div>
       </div>
     </div>
@@ -582,14 +582,14 @@
       Track spending across all your AWS accounts: myfamilyassistant.ai, sQuark.ai, and mesonsoft.com.
     </p>
     <form id="form-costs">
-      <label>AWS Account 1 (Management Account):</label>
-      <input type="text" id="awsAccount1" placeholder="123456789 | Region: us-east-2" value="123456789" />
+      <label>AWS Account 1 — myfamilyassistant.ai (sQuarkAI):</label>
+      <input type="text" id="awsAccount1" placeholder="873363353263" value="873363353263" />
       
-      <label>Linked Account 2:</label>
-      <input type="text" id="awsAccount2" placeholder="987654321 | sQuark.ai" value="987654321" />
+      <label>AWS Account 2 — sQuark.ai (MesonX):</label>
+      <input type="text" id="awsAccount2" placeholder="6574-7346-4918" value="6574-7346-4918" />
       
-      <label>Linked Account 3:</label>
-      <input type="text" id="awsAccount3" placeholder="555555555 | mesonsoft.com" value="555555555" />
+      <label>AWS Account 3 — mesonsoft.com (Mesonsoft):</label>
+      <input type="text" id="awsAccount3" placeholder="9046-0039-3479" value="9046-0039-3479" />
 
       <label>Monthly Budget Limit (USD):</label>
       <input type="number" id="budgetLimit" step="10" min="100" placeholder="2000" value="2000" />
@@ -616,6 +616,7 @@
 <script>
 (function () {
   var API_BASE = 'progress_api.php';
+  var COSTS_API = 'https://sedjs5xyfe.execute-api.us-east-2.amazonaws.com/production/api/v1/costs/get-costs';
   var db = { projects: [], logs: [] };
 
   var elMsg = document.getElementById('msg');
@@ -672,19 +673,66 @@
   var costDashboard = document.getElementById('costDashboard');
   if (costDashboard) costDashboard.style.display = 'block';
 
+  // Load cost data on page load
+  function loadCostsOnInit() {
+    var accounts = ['873363353263', '6574-7346-4918', '9046-0039-3479'];
+    fetch(COSTS_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ account_ids: accounts })
+    })
+    .then(function(response) {
+      if (!response.ok) throw new Error('API returned ' + response.status);
+      return response.json();
+    })
+    .then(function(data) {
+      updateCostsDashboard(data, accounts);
+    })
+    .catch(function(err) {
+      console.warn('Could not load initial cost data:', err);
+    });
+  }
+  
+  // Load costs on page load (with slight delay to ensure DOM is ready)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadCostsOnInit);
+  } else {
+    loadCostsOnInit();
+  }
+
   // Cost form submission
   if (formCosts) {
     formCosts.addEventListener('submit', function (e) {
       e.preventDefault();
       var accounts = [
-        document.getElementById('awsAccount1').value,
-        document.getElementById('awsAccount2').value,
-        document.getElementById('awsAccount3').value
+        document.getElementById('awsAccount1').value || '873363353263',
+        document.getElementById('awsAccount2').value || '6574-7346-4918',
+        document.getElementById('awsAccount3').value || '9046-0039-3479'
       ];
-      var budget = parseFloat(document.getElementById('budgetLimit').value);
-      var threshold = parseFloat(document.getElementById('alertThreshold').value);
+      var budget = parseFloat(document.getElementById('budgetLimit').value) || 2000;
+      var threshold = parseFloat(document.getElementById('alertThreshold').value) || 1500;
       
       showMsg('✅ Cost tracking configured. Connected to ' + accounts.length + ' AWS accounts with $' + budget + '/month budget limit.', 'ok', 5000);
+      
+      // Automatically fetch cost data for the new accounts
+      showMsg('🔄 Fetching cost data for new accounts...', 'info', 2000);
+      fetch(COSTS_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ account_ids: accounts })
+      })
+      .then(function(response) {
+        if (!response.ok) throw new Error('API returned ' + response.status);
+        return response.json();
+      })
+      .then(function(data) {
+        updateCostsDashboard(data, accounts);
+        showMsg('✅ Cost data loaded for configured accounts!', 'ok', 3000);
+      })
+      .catch(function(err) {
+        console.error('Cost API error:', err);
+        showMsg('❌ Could not fetch cost data: ' + err.message, 'error', 4000);
+      });
     });
   }
 
@@ -692,11 +740,93 @@
   if (refreshCostsBtn) {
     refreshCostsBtn.addEventListener('click', function (e) {
       e.preventDefault();
-      showMsg('🔄 Fetching latest AWS cost data... (In production, this queries Cost Explorer API)', 'ok', 3000);
-      setTimeout(function () {
+      showMsg('🔄 Fetching latest AWS cost data...', 'ok', 3000);
+      
+      var accounts = [
+        document.getElementById('awsAccount1').value || '873363353263',
+        document.getElementById('awsAccount2').value || '6574-7346-4918',
+        document.getElementById('awsAccount3').value || '9046-0039-3479'
+      ];
+      
+      // Fetch real cost data from the Cost Explorer API
+      fetch(COSTS_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ account_ids: accounts })
+      })
+      .then(function(response) {
+        if (!response.ok) throw new Error('API returned ' + response.status);
+        return response.json();
+      })
+      .then(function(data) {
+        // Update dashboard with real cost data
+        updateCostsDashboard(data, accounts);
         showMsg('✅ Cost data refreshed successfully!', 'ok', 3000);
-      }, 2000);
+      })
+      .catch(function(err) {
+        console.error('Cost API error:', err);
+        showMsg('❌ Failed to fetch cost data: ' + err.message, 'error', 5000);
+      });
     });
+  }
+
+  function updateCostsDashboard(data, accounts) {
+    // Update summary metrics
+    var totalCost = data.total_costs || 0;
+    var projectedMonthly = data.projected_monthly || 0;
+    var projectedAnnual = projectedMonthly * 12;
+    
+    document.getElementById('costThisMonth').textContent = '$' + projectedMonthly.toFixed(2);
+    document.getElementById('costLast30').textContent = '$' + (totalCost / 30).toFixed(2);
+    document.getElementById('costAnnual').textContent = '$' + projectedAnnual.toFixed(2);
+    
+    // Calculate budget usage (assuming $2000/month limit)
+    var budgetLimit = 2000;
+    var budgetPct = Math.round((projectedMonthly / budgetLimit) * 100);
+    document.getElementById('costBudgetPct').textContent = budgetPct + '%';
+    
+    // Update by-account breakdown
+    var costAccountsDiv = document.getElementById('costAccounts');
+    costAccountsDiv.innerHTML = '';
+    
+    Object.keys(data.costs_by_account || {}).forEach(function(accountId) {
+      var accountData = data.costs_by_account[accountId];
+      var accountTotal = accountData.total || 0;
+      var services = accountData.services || {};
+      
+      // Get top 3 services with costs
+      var topServices = Object.entries(services)
+        .sort(function(a, b) { return b[1] - a[1]; })
+        .slice(0, 3)
+        .map(function(entry) { return entry[0] + ': $' + parseFloat(entry[1]).toFixed(2); });
+      
+      var accountLabel = getAccountLabel(accountId);
+      var accountDiv = document.createElement('div');
+      accountDiv.className = 'cost-account';
+      accountDiv.innerHTML = 
+        '<div class="cost-account-name">' + accountLabel + ' (Account ' + accountId + ')</div>' +
+        '<div class="cost-account-amount">$' + accountTotal.toFixed(2) + '</div>' +
+        '<div style="font-size:0.75rem; color:var(--sub); margin-top:0.3rem;">' + topServices.join(' | ') + '</div>';
+      costAccountsDiv.appendChild(accountDiv);
+    });
+    
+    // Update cost trend indicator
+    if (projectedMonthly > totalCost / 30) {
+      document.querySelector('.cost-trend').className = 'cost-trend up';
+      document.querySelector('.cost-trend').innerHTML = '📈 <strong>Trending Up:</strong> Projected monthly higher than 30-day average';
+    } else {
+      document.querySelector('.cost-trend').className = 'cost-trend down';
+      document.querySelector('.cost-trend').innerHTML = '📉 <strong>Trending Down:</strong> Costs lower than recent average';
+    }
+  }
+  
+  function getAccountLabel(accountId) {
+    var labels = {
+      '873363353263': '👨‍👩‍👧‍👦 myfamilyassistant.ai',
+      '6574-7346-4918': '🎮 sQuark.ai',
+      '9046-0039-3479': '🏪 mesonsoft.com'
+    };
+    return labels[accountId] || '📦 Account ' + accountId;
   }
 
   // Active dashboard tab (legacy projects w/o a category default to Enterprise)
