@@ -426,24 +426,24 @@
     <h3>💰 AWS Cost Dashboard (Multi-Account Tracking)</h3>
     <div class="cost-grid">
       <div class="cost-metric">
-        <span class="cost-metric-label">This Month</span>
-        <span class="cost-metric-value" id="costThisMonth">$0.00</span>
-        <span class="cost-metric-sub">Across all accounts</span>
+        <span class="cost-metric-label">📊 Actual (30-Day)</span>
+        <span class="cost-metric-value" id="costActual">$0.00</span>
+        <span class="cost-metric-sub">Historical usage</span>
       </div>
       <div class="cost-metric">
-        <span class="cost-metric-label">Last 30 Days</span>
-        <span class="cost-metric-value" id="costLast30">$0.00</span>
-        <span class="cost-metric-sub">Average per account</span>
+        <span class="cost-metric-label">📈 Expected (Monthly)</span>
+        <span class="cost-metric-value" id="costExpected">$0.00</span>
+        <span class="cost-metric-sub">Projected based on usage</span>
       </div>
       <div class="cost-metric">
-        <span class="cost-metric-label">Projected Annual</span>
+        <span class="cost-metric-label">📅 Annual Projection</span>
         <span class="cost-metric-value" id="costAnnual">$0.00</span>
-        <span class="cost-metric-sub">Based on 30-day avg</span>
+        <span class="cost-metric-sub">Expected yearly total</span>
       </div>
       <div class="cost-metric">
-        <span class="cost-metric-label">Budget Used</span>
+        <span class="cost-metric-label">💰 Budget Used</span>
         <span class="cost-metric-value" id="costBudgetPct">0%</span>
-        <span class="cost-metric-sub">of $2,000/month limit</span>
+        <span class="cost-metric-sub">of $225/month limit</span>
       </div>
     </div>
 
@@ -776,12 +776,17 @@
     var projectedMonthly = data.projected_monthly || 0;
     var projectedAnnual = projectedMonthly * 12;
     
-    document.getElementById('costThisMonth').textContent = '$' + projectedMonthly.toFixed(2);
-    document.getElementById('costLast30').textContent = '$' + (totalCost / 30).toFixed(2);
+    // Actual: 30-day historical costs
+    document.getElementById('costActual').textContent = '$' + totalCost.toFixed(2);
+    
+    // Expected: Projected monthly based on trend
+    document.getElementById('costExpected').textContent = '$' + projectedMonthly.toFixed(2);
+    
+    // Annual Projection: Expected monthly × 12
     document.getElementById('costAnnual').textContent = '$' + projectedAnnual.toFixed(2);
     
-    // Calculate budget usage (assuming $2000/month limit)
-    var budgetLimit = 2000;
+    // Calculate budget usage (current budget: $225/month)
+    var budgetLimit = 225;
     var budgetPct = Math.round((projectedMonthly / budgetLimit) * 100);
     document.getElementById('costBudgetPct').textContent = budgetPct + '%';
     
@@ -811,12 +816,15 @@
     });
     
     // Update cost trend indicator
-    if (projectedMonthly > totalCost / 30) {
+    if (projectedMonthly > totalCost) {
       document.querySelector('.cost-trend').className = 'cost-trend up';
-      document.querySelector('.cost-trend').innerHTML = '📈 <strong>Trending Up:</strong> Projected monthly higher than 30-day average';
-    } else {
+      document.querySelector('.cost-trend').innerHTML = '📈 <strong>Trending Up:</strong> Projected costs higher than historical average';
+    } else if (projectedMonthly < totalCost) {
       document.querySelector('.cost-trend').className = 'cost-trend down';
-      document.querySelector('.cost-trend').innerHTML = '📉 <strong>Trending Down:</strong> Costs lower than recent average';
+      document.querySelector('.cost-trend').innerHTML = '📉 <strong>Trending Down:</strong> Projected costs lower than historical usage';
+    } else {
+      document.querySelector('.cost-trend').className = 'cost-trend flat';
+      document.querySelector('.cost-trend').innerHTML = '➡️  <strong>Stable:</strong> Costs consistent with historical trend';
     }
   }
   
