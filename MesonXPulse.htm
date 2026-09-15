@@ -869,7 +869,7 @@
       var accountDiv = document.createElement('div');
       accountDiv.className = 'cost-account';
       accountDiv.innerHTML = 
-        '<div class="cost-account-name">' + accountLabel + ' (Account ' + accountId + ')</div>' +
+        '<div class="cost-account-name">' + accountLabel + ' · ' + accountId + '</div>' +
         '<div class="cost-account-amount">$' + accountTotal.toFixed(2) + '</div>' +
         '<div style="font-size:0.75rem; color:var(--sub); margin-top:0.3rem;">' + topServices.join(' | ') + '</div>';
       costAccountsDiv.appendChild(accountDiv);
@@ -890,11 +890,11 @@
   
   function getAccountLabel(accountId) {
     var labels = {
-      '873363353263': '👨‍👩‍👧‍👦 myfamilyassistant.ai',
-      '6574-7346-4918': '🎮 sQuark.ai',
-      '9046-0039-3479': '🏪 mesonsoft.com'
+      '873363353263': 'MesonX',
+      '6574-7346-4918': 'sQuarkAI',
+      '9046-0039-3479': 'Mesonsoft'
     };
-    return labels[accountId] || '📦 Account ' + accountId;
+    return labels[accountId] || 'Account';
   }
 
   // Active dashboard tab (legacy projects w/o a category default to Enterprise)
