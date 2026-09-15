@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Progress Monitor | AniShiv</title>
+<meta name="description" content="AniShiv Progress Monitor - Track daily project tasks, accomplishments, accrued time overhead, and strategic end goals across Enterprise and Personal categories." />
+<style>
+  /* Apple-inspired design system — dark mode */
+  :root {
+    --blue: #0a84ff;
+    --blue-active: #409cff;
+    --ink: #f5f5f7;
+    --sub: #86868b;
+    --hair: #3a3a3c;
+    --row-line: #2c2c2e;
+    --fill: #000000;
+    --card: #1c1c1e;
+    --success: #30d158;
+    --warning: #ff9500;
+    --danger: #ff453a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  ::selection { background: rgba(10, 132, 255, 0.35); }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #3a3a3c; border-radius: 8px; border: 2px solid #000; }
+  ::-webkit-scrollbar-thumb:hover { background: #48484a; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--fill);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 2.5rem 2rem 5rem; }
+  .back { display: inline-block; margin-bottom: 1.5rem; color: var(--blue); text-decoration: none; font-weight: 500; font-size: 0.95rem; }
+  .back:hover { text-decoration: underline; }
+  h1 { font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 0.35rem; }
+  p { line-height: 1.5; }
+
+  /* Segmented control tabs (iOS-style) */
+  .tabs {
+    display: inline-flex;
+    gap: 2px;
+    padding: 3px;
+    background: #2c2c2e;
+    border-radius: 980px;
+    margin: 1.5rem 0 1.5rem;
+  }
+  .tab {
+    background: transparent;
+    color: var(--sub);
+    padding: 0.45rem 1.2rem;
+    border-radius: 980px;
+    font-size: 0.9rem;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .tab:hover { background: rgba(255, 255, 255, 0.1); }
+  .tab.active { background: #5a5a5e; color: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5); }
+  .tab .count { opacity: 0.6; font-weight: 400; margin-left: 0.35rem; }
+
+  /* Dashboard panel */
+  .dash {
+    background: var(--card);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 22px;
+    padding: 1.75rem;
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.55);
+  }
+
+  /* Project cards */
+  .proj-h3 { margin: 0 0 0.6rem; font-size: 1.45rem; font-weight: 650; letter-spacing: -0.01em; color: var(--ink); }
+  .goals {
+    margin: 0 0 1rem;
+    font-size: 0.95rem;
+    color: #d1d1d6;
+    background: #232326;
+    padding: 0.85rem 1rem;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .empty { color: var(--sub); font-style: italic; }
+  .proj-website { margin: 0 0 1rem; font-size: 0.9rem; }
+  .proj-website a { color: var(--blue); text-decoration: none; font-weight: 600; }
+  .proj-website a:hover { text-decoration: underline; }
+  .no-website { color: var(--sub); font-style: italic; }
+
+  /* Platform chips */
+  .badge-plat {
+    display: inline-block;
+    background: #232326;
+    color: #d1d1d6;
+    border-radius: 980px;
+    padding: 0.22rem 0.7rem;
+    margin: 0 0.3rem 0.3rem 0;
+    font-size: 0.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .no-plat { color: var(--sub); font-size: 0.85rem; }
+
+  /* Button styles */
+  .btn-edit { 
+    background: #2c2c2e; 
+    color: #d1d1d6; 
+    padding: 0.32rem 0.8rem; 
+    font-size: 0.8rem; 
+    margin-left: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.15s ease;
+  }
+  .btn-edit:hover { background: #3a3a3c; }
+  .btn-quick { 
+    background: rgba(10, 132, 255, 0.14); 
+    color: #64a8ff; 
+    border: 1px solid rgba(10, 132, 255, 0.45); 
+    padding: 0.32rem 0.8rem; 
+    font-size: 0.8rem; 
+    margin-left: 0.5rem; 
+    border-radius: 980px; 
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.15s ease;
+  }
+  .btn-quick:hover { background: rgba(10, 132, 255, 0.26); }
+
+  /* Trend visualization */
+  .trend-wrap { margin: 1rem 0 1.25rem; }
+  .trend-svg { width: 100%; height: 130px; display: block; }
+  .trend-line {
+    fill: none; stroke: var(--blue); stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+    transition: stroke-dashoffset 1.5s ease;
+  }
+  .trend-line.dim { stroke: #55555c; }
+  .trend-area { fill: rgba(0, 113, 227, 0.13); transition: opacity 1.2s ease; opacity: 0; }
+  .trend-area.show, .trend-area.animate { opacity: 1; }
+  .trend-dot { fill: var(--blue); transition: transform 0.2s ease; }
+  .trend-dot:hover { transform: scale(1.6); transform-box: fill-box; transform-origin: center; }
+  .chart-axis { fill: var(--sub); font-size: 9px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin-top: 0.5rem; font-size: 0.78rem; color: #a1a1a6; }
+  .legend b { color: var(--ink); }
+  .legend-item { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .legend-swatch { width: 10px; height: 10px; border-radius: 3px; flex: 0 0 auto; }
+
+  /* Cool parallax background */
+  body { overflow-x: hidden; }
+  .wrap { position: relative; z-index: 1; }
+  .parallax-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .parallax-blob {
+    position: absolute;
+    will-change: transform;
+  }
+  .parallax-blob .blob-inner {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 32% 30%, var(--c, #48cae4), transparent 70%);
+    filter: blur(48px);
+    opacity: 0.38;
+    animation: blobFloat 16s ease-in-out infinite;
+  }
+  .parallax-blob:nth-child(2) .blob-inner { animation-duration: 19s; animation-delay: -4s; }
+  .parallax-blob:nth-child(3) .blob-inner { animation-duration: 22s; animation-delay: -8s; }
+  .parallax-blob:nth-child(4) .blob-inner { animation-duration: 18s; animation-delay: -2s; }
+  .parallax-blob:nth-child(5) .blob-inner { animation-duration: 24s; animation-delay: -6s; }
+  @keyframes blobFloat {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(26px, -34px, 0) scale(1.1); }
+  }
+
+  /* Site footer */
+  .site-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--row-line);
+    text-align: center;
+    color: var(--sub);
+    font-size: 0.85rem;
+  }
+  .site-footer p { margin: 0; }
+
+  /* Brand heading */
+  .h-brand { letter-spacing: -0.02em; }
+  .brand-metal {
+    background: linear-gradient(180deg, #fdfdff 0%, #c8d0da 16%, #6b7480 38%, #98a2ad 50%, #4a525c 58%, #aeb8c3 80%, #f0f4f8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    filter: drop-shadow(0 0 10px rgba(45, 212, 191, 0.55)) drop-shadow(0 0 24px rgba(34, 211, 238, 0.40));
+  }
+  .brand-pulse {
+    display: inline-block;
+    color: #ffffff;
+    -webkit-text-stroke: 1px rgba(34, 211, 238, 0.35);
+    filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.55)) drop-shadow(0 0 18px rgba(45, 212, 191, 0.35));
+    animation: heartPulse 1.25s ease-in-out infinite;
+  }
+  @keyframes heartPulse {
+    0%   { transform: scale(1); }
+    15%  { transform: scale(1.18); }
+    30%  { transform: scale(1); }
+    45%  { transform: scale(1.10); }
+    60%  { transform: scale(1); }
+    100% { transform: scale(1); }
+  }
+
+  @media (max-width: 720px) {
+    h1 { font-size: 1.85rem; }
+  }
+</style>
+</head>
+<body>
+<div class="parallax-bg" id="parallaxBg" aria-hidden="true">
+  <div class="parallax-blob" data-depth="0.25" style="--c:#48cae4; top:-8%; left:-6%; width:360px; height:360px;"><span class="blob-inner"></span></div>
+  <div class="parallax-blob" data-depth="0.18" style="--c:#0071e3; top:-12%; right:-8%; width:420px; height:420px;"><span class="blob-inner"></span></div>
+  <div class="parallax-blob" data-depth="0.32" style="--c:#7209b7; bottom:-14%; left:-10%; width:440px; height:440px;"><span class="blob-inner"></span></div>
+  <div class="parallax-blob" data-depth="0.22" style="--c:#00a278; bottom:-10%; right:-6%; width:380px; height:380px;"><span class="blob-inner"></span></div>
+  <div class="parallax-blob" data-depth="0.40" style="--c:#4cc9f0; top:38%; left:52%; width:460px; height:460px;"><span class="blob-inner"></span></div>
+</div>
+
+<div class="wrap content" id="content">
+  <a class="back" href="/">&larr; Back to AniShiv World</a>
+  <h1 class="h-brand"><span class="brand-metal">Progress</span> <span class="brand-pulse">Monitor</span></h1>
+
+  <!-- Projects by category tabs -->
+  <div class="tabs">
+    <button type="button" class="tab active" data-tab="Enterprise">🏢 Enterprise<span class="count" id="count-Enterprise">0</span></button>
+    <button type="button" class="tab" data-tab="Personal">🏠 Personal<span class="count" id="count-Personal">0</span></button>
+  </div>
+  
+  <div class="dash" id="dashboard">
+    <p class="empty">Loading projects...</p>
+  </div>
+
+  <footer class="site-footer">
+    <p>Copyright &copy; <span id="footerYear">2026</span> Mesonsoft. All Rights Reserved.</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var API_BASE = 'progress_api.php';
+  var db = { projects: [], logs: [] };
+  var dashboard = document.getElementById('dashboard');
+  var activeTab = 'Enterprise';
+  var CATEGORIES = ['Enterprise', 'Personal'];
+  var TREND_START = '2026-01-01';
+  var TREND_END = new Date().toISOString().split('T')[0];
+
+  /* Color palette for projects */
+  var COOL_PALETTE = [
+    '#0077b6', '#00b4d8', '#0096c7', '#48cae4', '#90e0ef',
+    '#4d7cff', '#0071e3', '#00a278', '#64dfdf', '#48bfe3',
+    '#00d9ff', '#4cc9f0', '#06ffa5', '#20c997', '#00ff88'
+  ];
+
+  function projectColor(pid) {
+    var hash = 0;
+    for (var i = 0; i < pid.length; i++) {
+      var char = pid.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return COOL_PALETTE[Math.abs(hash) % COOL_PALETTE.length];
+  }
+
+  function projectCategory(proj) {
+    return proj.category === 'Personal' ? 'Personal' : 'Enterprise';
+  }
+
+  function escapeHtml(text) {
+    var map = {
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+    };
+    return (text || '').replace(/[&<>"']/g, function(m) { return map[m]; });
+  }
+
+  function buildWebsiteLink(url) {
+    if (!url) return '<span class="no-website">Not specified</span>';
+    return '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' + escapeHtml(url) + '</a>';
+  }
+
+  function buildPlatformBadges(platforms) {
+    if (!platforms || platforms.length === 0) {
+      return '<span class="no-plat">None specified</span>';
+    }
+    return platforms.map(function (p) {
+      var icons = {
+        'Desktop': '🖥️', 'Mobile': '📱', 'Web': '🌐', 'eCommerce': '🛒',
+        'AI': '🤖', 'Sports': '⚽'
+      };
+      return '<span class="badge-plat">' + (icons[p] || '📌') + ' ' + escapeHtml(p) + '</span>';
+    }).join('');
+  }
+
+  function shortDate(dateStr) {
+    var d = new Date(dateStr + 'T00:00:00Z');
+    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months[d.getUTCMonth()] + ' ' + d.getUTCDate();
+  }
+
+  function renderTrend(el, dataPoints, opts) {
+    if (!el || !dataPoints || dataPoints.length === 0) return;
+    
+    opts = opts || {};
+    var width = opts.width || 600;
+    var height = opts.height || 130;
+    var color = opts.color || '#0071e3';
+    var padding = 20;
+    var graphWidth = width - 2 * padding;
+    var graphHeight = height - 2 * padding;
+
+    var maxY = Math.max.apply(null, dataPoints.map(function (d) { return d.y; })) || 1;
+    var minY = 0;
+    var range = maxY - minY;
+
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+    svg.setAttribute('class', 'trend-svg');
+
+    // Background area under line
+    var areaPath = 'M ' + padding + ' ' + (height - padding);
+    dataPoints.forEach(function (d, i) {
+      var x = padding + (i / (dataPoints.length - 1 || 1)) * graphWidth;
+      var y = height - padding - ((d.y - minY) / range) * graphHeight;
+      areaPath += ' L ' + x + ' ' + y;
+    });
+    areaPath += ' L ' + (padding + graphWidth) + ' ' + (height - padding) + ' Z';
+    
+    var area = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    area.setAttribute('d', areaPath);
+    area.setAttribute('class', 'trend-area');
+    area.setAttribute('fill', color);
+    area.setAttribute('opacity', '0.15');
+    svg.appendChild(area);
+
+    // Line
+    var linePath = 'M';
+    dataPoints.forEach(function (d, i) {
+      var x = padding + (i / (dataPoints.length - 1 || 1)) * graphWidth;
+      var y = height - padding - ((d.y - minY) / range) * graphHeight;
+      linePath += (i === 0 ? ' ' : ' L ') + x + ' ' + y;
+    });
+    
+    var line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    line.setAttribute('d', linePath);
+    line.setAttribute('class', 'trend-line');
+    line.setAttribute('stroke', color);
+    svg.appendChild(line);
+
+    // Dots
+    dataPoints.forEach(function (d, i) {
+      var x = padding + (i / (dataPoints.length - 1 || 1)) * graphWidth;
+      var y = height - padding - ((d.y - minY) / range) * graphHeight;
+      var dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      dot.setAttribute('cx', x);
+      dot.setAttribute('cy', y);
+      dot.setAttribute('r', '3');
+      dot.setAttribute('class', 'trend-dot');
+      dot.setAttribute('fill', color);
+      dot.setAttribute('title', d.date + ': ' + d.y.toFixed(2) + 'h');
+      svg.appendChild(dot);
+    });
+
+    el.innerHTML = '';
+    el.appendChild(svg);
+  }
+
+  function computeByDate() {
+    var agg = {
+      perDate: {},
+      perProject: {},
+      projectTotals: {}
+    };
+    db.logs.forEach(function (log) {
+      if (log.date < TREND_START || log.date > TREND_END) return;
+      var hours = parseFloat(log.timeSpent || 0);
+      agg.perDate[log.date] = (agg.perDate[log.date] || 0) + hours;
+      agg.perProject[log.projectId] = agg.perProject[log.projectId] || {};
+      agg.perProject[log.projectId][log.date] = (agg.perProject[log.projectId][log.date] || 0) + hours;
+      agg.projectTotals[log.projectId] = (agg.projectTotals[log.projectId] || 0) + hours;
+    });
+    return agg;
+  }
+
+  function dailySeries(buckets, startDate, endDate) {
+    var series = [];
+    var d = new Date(startDate + 'T00:00:00Z');
+    var end = new Date(endDate + 'T00:00:00Z');
+    while (d <= end) {
+      var dateStr = d.toISOString().split('T')[0];
+      series.push({
+        date: dateStr,
+        y: buckets[dateStr] || 0
+      });
+      d.setUTCDate(d.getUTCDate() + 1);
+    }
+    return series;
+  }
+
+  function renderProjectTrend(el, projectId) {
+    if (!el) return;
+    var agg = computeByDate();
+    var buckets = agg.perProject[projectId] || {};
+    var daily = dailySeries(buckets, TREND_START, TREND_END);
+    var cum = 0;
+    var cumulative = daily.map(function (d) { cum += d.y; return { date: d.date, y: cum }; });
+    var total = cum;
+    renderTrend(el, cumulative, { width: 600, height: 130, color: projectColor(projectId) });
+    var cap = document.createElement('div');
+    cap.className = 'legend';
+    cap.innerHTML = '<span class="legend-swatch" style="background:' + projectColor(projectId) + '"></span> <b>📈 Trending (cumulative)</b> — <b>' + total.toFixed(1) + ' hrs</b> total since ' + shortDate(TREND_START);
+    el.parentNode.appendChild(cap);
+  }
+
+  function render() {
+    CATEGORIES.forEach(function (cat) {
+      var countEl = document.getElementById('count-' + cat);
+      if (countEl) countEl.textContent = db.projects.filter(function (p) { return projectCategory(p) === cat; }).length;
+    });
+
+    var visible = db.projects.filter(function (p) { return projectCategory(p) === activeTab; });
+
+    if (visible.length === 0) {
+      dashboard.innerHTML = '<p class="empty">No ' + escapeHtml(activeTab) + ' projects found. Use MesonXPulse to initialize a project.</p>';
+      return;
+    }
+
+    var html = '';
+    visible.forEach(function (project) {
+      var projectLogs = db.logs.filter(function (l) {
+        return l.projectId === project.id && l.date >= TREND_START && l.date <= TREND_END;
+      });
+      var totalHours = projectLogs.reduce(function (sum, cur) { return sum + parseFloat(cur.timeSpent || 0); }, 0);
+      var pc = projectColor(project.id);
+
+      html += '<div style="margin:0 0 2.5rem;padding:0 0 1.5rem 1rem;border-left:4px solid ' + pc + ';border-bottom:1px solid rgba(255,255,255,0.09);">';
+      html += '<h3 class="proj-h3" style="color:' + pc + '">📁 ' + escapeHtml(project.name) + '</h3>';
+      html += '<p class="goals" style="margin-bottom:0.5rem;"><strong>🎯 Core End Goal Target:</strong> ' +
+              escapeHtml(project.endGoal || 'None Specified') +
+              '<span style="margin:0 10px;color:#55555c">|</span>' +
+              '<strong>⏳ Accrued Overhead:</strong> ' + totalHours.toFixed(2) + ' Hours since Jan 2026</p>';
+      html += '<p class="proj-website"><strong>🔗 Website:</strong> ' + buildWebsiteLink(project.website) + '</p>';
+      html += '<div style="margin:0 0 1rem;"><strong style="font-size:0.85rem;">🖱️ Platforms:</strong> ' +
+              buildPlatformBadges(project.platforms) + '</div>';
+      html += '<div class="trend-wrap" id="trend-' + escapeHtml(project.id) + '"></div>';
+
+      if (projectLogs.length === 0) {
+        html += '<p class="empty" style="margin-left:0.5rem;">No logs registered to this project profile yet.</p>';
+      }
+      html += '</div>';
+    });
+    dashboard.innerHTML = html;
+    visible.forEach(function (project) {
+      renderProjectTrend(document.getElementById('trend-' + project.id), project.id);
+    });
+  }
+
+  function loadData(cb) {
+    fetch(API_BASE, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(function(resp) { return resp.json(); })
+    .then(function(data) {
+      db = data || { projects: [], logs: [] };
+      render();
+      if (cb) cb();
+    })
+    .catch(function(err) {
+      console.error('Failed to load project data:', err);
+      dashboard.innerHTML = '<p class="empty">Error loading project data. Please try again later.</p>';
+      if (cb) cb();
+    });
+  }
+
+  /* Tab switching */
+  document.querySelectorAll('.tab').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      activeTab = this.getAttribute('data-tab');
+      document.querySelectorAll('.tab').forEach(function (t) {
+        t.classList.toggle('active', t.getAttribute('data-tab') === activeTab);
+      });
+      render();
+    });
+  });
+
+  /* Set footer year */
+  var now = new Date();
+  document.getElementById('footerYear').textContent = now.getFullYear();
+
+  /* Initial load */
+  loadData();
+})();
+</script>
+</body>
+</html>
