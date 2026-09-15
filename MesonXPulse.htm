@@ -866,10 +866,12 @@
         .map(function(entry) { return entry[0] + ': $' + parseFloat(entry[1]).toFixed(2); });
       
       var accountLabel = getAccountLabel(accountId);
+      var projectNames = getAccountProjects(accountId);
       var accountDiv = document.createElement('div');
       accountDiv.className = 'cost-account';
       accountDiv.innerHTML = 
         '<div class="cost-account-name">' + accountLabel + ' · ' + accountId + '</div>' +
+        '<div style="font-size:0.85rem; color:var(--sub); margin-top:0.2rem;">' + projectNames + '</div>' +
         '<div class="cost-account-amount">$' + accountTotal.toFixed(2) + '</div>' +
         '<div style="font-size:0.75rem; color:var(--sub); margin-top:0.3rem;">' + topServices.join(' | ') + '</div>';
       costAccountsDiv.appendChild(accountDiv);
@@ -895,6 +897,15 @@
       '9046-0039-3479': 'Mesonsoft'
     };
     return labels[accountId] || 'Account';
+  }
+
+  function getAccountProjects(accountId) {
+    var projects = {
+      '873363353263': 'sQuark Bot / Enterprise',
+      '6574-7346-4918': 'sQuark Flow / Agentic AI',
+      '9046-0039-3479': 'MySports365 / Respofit'
+    };
+    return projects[accountId] || '';
   }
 
   // Active dashboard tab (legacy projects w/o a category default to Enterprise)
