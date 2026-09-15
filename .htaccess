@@ -1,0 +1,14 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  
+  # Check if myfamilyassistant.ai domain and not already in subfolder
+  RewriteCond %{HTTP_HOST} ^(www\.)?myfamilyassistant\.ai$ [NC]
+  RewriteCond %{REQUEST_URI} !^/myfamilyassistant\.ai/ [NC]
+  # Rewrite to subfolder with PT (pass-through) so the file is served from there
+  RewriteRule ^(.*)$ /myfamilyassistant.ai/$1 [PT,L,QSA]
+</IfModule>
+
+
+
+
